@@ -893,7 +893,7 @@ function predictMin(V, dm) { var lo = 5, hi = 900; for (var i = 0; i < 60; i++) 
 function curVdot() { for (var i = N - 1; i >= 0; i--) if (D.vdot90[i] != null) return D.vdot90[i]; return null; }
 function paces() {
   var gs = MS.goal * 60, V = vdotOf(MAR_M, MS.goal), mp = gs / MAR_MI, mx = META.max_hr, cvv = curVdot(), ez = Math.max(mp + 60, spm(velAt(0.74 * Math.min(V, cvv || V))));
-  return { V: V, gs: gs, mp: mp, e1: ez, e2: ez + 60, l1: Math.max(mp + 45, ez - 15), l2: Math.max(mp + 45, ez - 15) + 45, t: spm(velAt(0.88 * V)), i: spm(velAt(0.975 * V)), mx: mx };
+  return { V: V, gs: gs, mp: mp, e1: ez, e2: ez + 60, l1: Math.max(mp + 45, ez - 15), l2: Math.max(mp + 45, ez - 15) + 45, t: spm(velAt(0.88 * V)), k: spm(velAt(0.94 * V)), i: spm(velAt(0.975 * V)), mx: mx };
 }
 function md(d) { var x = new Date(d * 864e5); return MON[x.getUTCMonth()] + ' ' + x.getUTCDate(); }
 function fm(v) { return v >= 100 ? f0(v) : f1(v); }
@@ -903,26 +903,26 @@ function prange(a, b) { return ptime(a) + ' to ' + ptime(b) + ' /mi'; }
 /* plan: [Mon, Wed, Thu, Fri, Sat miles, Monday workout, Wednesday track session, long run note, week note]
    Weekly shape: Mon tempo/fartlek/marathon pace, Tue rest 1 (swap with Thu if needed), Wed track, Thu easy, Fri easy + strides, Sat long, Sun rest 2. */
 var PW = [
-  [7, 6, 3, 4, 12, '3.1 mi (5K) at tempo pace', 'Track: 8 × 400 m at interval pace, 200 m jog', 'Long run, all easy', 'Hold the volume near what you just ran so your legs can catch up with the jump you made in October. The new Monday and Wednesday workouts start here, so keep every other run truly easy.'],
-  [7, 7, 3, 4, 13, '4 mi at tempo pace', 'Track: 5 × 800 m at interval pace, 400 m jog', 'Long run, all easy', ''],
-  [7, 8, 3, 4, 14, '2 × 2 mi at threshold pace, 2 min jog', 'Track: 6 × 800 m at interval pace, 400 m jog', 'Long run, all easy', ''],
-  [6, 6, 3, 5, 10, '8 × 1 min fast, 1 min easy (fartlek)', 'Track: 8 × 400 m at interval pace, 200 m jog', 'Cutback long run, all easy', 'Cutback week. Absorb the last three weeks.'],
-  [8, 7, 5, 4, 15, '2 × 2.5 mi at threshold pace, 3 min jog', 'Track: 6 × 800 m at interval pace, 400 m jog', 'Long run, all easy', 'Workouts get longer from here. Monday and Wednesday are the two quality days, Saturday is the long run, and everything else is easy.'],
-  [9, 7, 5, 5, 16, '6 mi at marathon pace', 'Track: 5 × 1000 m at interval pace, 400 m jog', 'Long run, all easy', 'First real marathon pace block.'],
-  [9, 7, 5, 6, 17, '3 × 2 mi at threshold pace, 2 min jog', 'Track: 4 × 1200 m at interval pace, 400 m jog', 'Long run, all easy. Do it Saturday, before the holiday trip starts', ''],
-  [6, 5, 4, 5, 12, '2 mi at tempo pace, keep it short', 'Track: 6 × 400 m at interval pace, 200 m jog. Any flat, safe stretch works if you cannot get to a track', 'Cutback long run, all easy', 'Holiday week, flexible. Protect the long run and one other run. Everything else is optional.'],
-  [10, 8, 6, 6, 17, '7 mi at marathon pace', 'Track: 6 × 1000 m at interval pace, 400 m jog', 'Long run, all easy', 'Back to full routine after the holiday week.'],
-  [10, 8, 7, 6, 18, '4 × 1.5 mi at threshold pace, 2 min jog', 'Track: 8 × 800 m at interval pace, 400 m jog', 'Long run, all easy', ''],
-  [10, 8, 7, 7, 20, '8 mi at marathon pace', 'Track: 6 × 1000 m at interval pace, 400 m jog', 'First 20 miler, all easy', ''],
-  [10, 8, 8, 7, 20, '6 mi at tempo pace', 'Track: 10 × 400 m at interval pace, 200 m jog', '20 miles: 14 easy, then 6 at marathon pace', 'Peak week. Your last long run, three weeks before the race.'],
-  [8, 6, 5, 5, 14, '3 × 2 mi at marathon pace, 2 min jog', 'Track: 6 × 400 m at interval pace, 400 m jog, short and sharp', 'Relaxed 14, all easy', 'Taper begins. Volume drops, sharpness stays.'],
-  [6, 5, 3, 4, 10, '2 mi at marathon pace inside a 6 mile run', 'Track: 5 × 400 m at interval pace, 400 m jog, short and sharp', 'Easy 10', 'Keep it boring. Sleep and food matter more than miles now.'],
+  [7, 7, 3, 4, 12, '3.1 mi (5K) at tempo pace', 'Track: 12 × 400 m at 5K pace, 200 m jog', 'Long run, all easy', 'Hold the volume near what you just ran so your legs can catch up with the jump you made in October. The new Monday and Wednesday workouts start here, so keep every other run truly easy.'],
+  [7, 8, 4, 4, 13, '4 mi at tempo pace', 'Track: 16 × 400 m at 5K pace, 200 m jog', 'Long run, all easy', ''],
+  [8, 8, 4, 5, 14, '2 × 2 mi at threshold pace, 2 min jog', 'Track: 6 × 1000 m at 10K pace, 400 m jog', 'Long run, all easy', ''],
+  [6, 7, 3, 5, 11, '8 × 1 min fast, 1 min easy (fartlek)', 'Track: 12 × 400 m at 5K pace, 200 m jog', 'Cutback long run, all easy', 'Cutback week. Absorb the last three weeks.'],
+  [9, 9, 5, 4, 15, '2 × 2.5 mi at threshold pace, 3 min jog', 'Track: 5 × 1600 m at 10K pace, 400 m jog', 'Long run, all easy', 'Workouts get bigger from here. Monday and Wednesday are the two quality days, Saturday is the long run, and everything else is easy.'],
+  [10, 9, 5, 6, 16, '6 mi at marathon pace', 'Track: 8 × 1000 m at 10K pace, 400 m jog', 'Long run, all easy', 'First real marathon pace block.'],
+  [10, 10, 6, 6, 17, '3 × 2 mi at threshold pace, 2 min jog', 'Track: Michigan workout (1600 m at 10K pace, 2 km tempo, 1200 m at 5K pace, 2 km tempo, 800 m hard, 2 km tempo, 400 m flat out)', 'Long run, all easy. Do it Saturday, before the holiday trip starts', ''],
+  [6, 7, 4, 5, 12, '2 mi at tempo pace, keep it short', 'Track: 12 × 400 m at 5K pace, 200 m jog. Any flat, safe stretch works if you cannot get to a track', 'Cutback long run, all easy', 'Holiday week, flexible. Protect the long run and one other run. Everything else is optional.'],
+  [11, 9, 8, 8, 17, '7 mi at marathon pace', 'Track: ladder of 1600, 1200, 800, 400, 800, 1200, 1600 m from 10K pace down to 5K pace, 400 m jog', 'Long run, all easy', 'Back to full routine after the holiday week.'],
+  [11, 10, 8, 8, 18, '4 × 1.5 mi at threshold pace, 2 min jog', 'Track: 20 × 400 m at 5K pace, 200 m jog', 'Long run, all easy', ''],
+  [11, 10, 8, 8, 20, '8 mi at marathon pace', 'Track: Michigan workout (1600 m at 10K pace, 2 km tempo, 1200 m at 5K pace, 2 km tempo, 800 m hard, 2 km tempo, 400 m flat out)', 'First 20 miler, all easy', ''],
+  [11, 10, 10, 9, 20, '6 mi at tempo pace', 'Track: 6 × 1600 m at 10K pace, 400 m jog', '20 miles: 14 easy, then 6 at marathon pace', 'Peak week, 60 miles. Your last long run, three weeks before the race.'],
+  [9, 8, 7, 8, 14, '3 × 2 mi at marathon pace, 2 min jog', 'Track: 12 × 400 m at 5K pace, 200 m jog', 'Relaxed 14, all easy', 'Taper begins. Volume drops, sharpness stays.'],
+  [6, 6, 4, 5, 10, '2 mi at marathon pace inside a 6 mile run', 'Track: 10 × 400 m at 5K pace, 200 m jog, short and sharp', 'Easy 10', 'Keep it boring. Sleep and food matter more than miles now.'],
   [4, 5, 3, 0, 0, '', '', '', 'Race week. Nothing new: shoes, food, clothes, routine.']
 ];
 var REST1 = 'Rest day 1. Light strength is fine (calisthenics, single leg work). Swap with Thursday if a week needs it.', REST2 = 'Rest day 2. Full rest, or an easy hike or spin.';
 var PLAN = PW.map(function (r, k) {
   var days;
-  if (k === 14) days = [{ t: 'E', mi: 4, d: 'Easy, relaxed' }, { t: 'Z', mi: 0, d: REST1 }, { t: 'Q', mi: 5, d: 'Track: 4 × 400 m at interval pace, 400 m jog, fast but relaxed' }, { t: 'E', mi: 3, d: 'Easy plus 4 strides' }, { t: 'Z', mi: 0, d: 'Rest. Travel, hydrate, lay out gear' }, { t: 'E', mi: 2, d: 'Shakeout plus 4 strides' }, { t: 'G', mi: 26.2, d: 'Kyoto Marathon, 9:00 start' }];
+  if (k === 14) days = [{ t: 'E', mi: 4, d: 'Easy, relaxed' }, { t: 'Z', mi: 0, d: REST1 }, { t: 'Q', mi: 5, d: 'Track: 4 × 400 m at 5K pace, 400 m jog, fast but relaxed' }, { t: 'E', mi: 3, d: 'Easy plus 4 strides' }, { t: 'Z', mi: 0, d: 'Rest. Travel, hydrate, lay out gear' }, { t: 'E', mi: 2, d: 'Shakeout plus 4 strides' }, { t: 'G', mi: 26.2, d: 'Kyoto Marathon, 9:00 start' }];
   else days = [{ t: 'Q', mi: r[0], d: r[5] }, { t: 'Z', mi: 0, d: REST1 }, { t: 'Q', mi: r[1], d: r[6] }, { t: 'E', mi: r[2], d: 'Easy aerobic run' }, { t: 'E', mi: r[3], d: 'Easy run plus 6 strides' }, { t: 'L', mi: r[4], d: r[7] }, { t: 'Z', mi: 0, d: REST2 }];
   return { n: k + 1, start: B0 + 7 * k, phase: k < 4 ? 'Base build' : k < 8 ? 'Build' : k < 12 ? 'Peak' : 'Taper', total: sum(days.map(function (x) { return x.mi; })), days: days, note: r[8] || '' };
 });
@@ -1067,7 +1067,7 @@ function guide(pl) {
   var P = paces(), x = pl.d, tx = '';
   if (pl.t === 'E') tx = 'Keep heart rate under ' + EASY_HR + '. Expect roughly ' + prange(P.e1, P.e2) + ', and let heart rate win any argument with pace. ' + (/strides/.test(x) ? 'Strides: 6 × 20 seconds fast but relaxed, walk back between.' : '');
   else if (pl.t === 'L') tx = 'Run ' + prange(P.l1, P.l2) + ', heart rate under ' + Math.round(META.max_hr * 0.79) + '. ' + (/marathon pace/.test(x) ? 'The marathon pace segment is ' + pmi(P.mp) + '. ' : '') + 'Practice the fueling you plan to use in Kyoto: 30 to 60 grams of carbs per hour.';
-  else if (pl.t === 'Q') tx = 'Total ' + f0(pl.mi) + ' mi including an easy warm-up and cool-down' + (/^Track/.test(x) ? ' (add 4 to 6 strides before the first rep)' : '') + '. ' + (/^Track/.test(x) ? 'Run the reps at about ' + pmi(P.i) + ': roughly ' + ptime(P.i * 400 / 1609.344) + ' per 400 m, ' + ptime(P.i * 800 / 1609.344) + ' per 800 m and ' + ptime(P.i * 1000 / 1609.344) + ' per 1000 m. Hard but even, with the last rep no slower than the first. Jog the recoveries.' : /marathon pace/.test(x) ? 'Marathon pace is ' + pmi(P.mp) + '.' : /threshold|tempo/.test(x) ? 'Threshold pace is about ' + pmi(P.t) + ', comfortably hard, a pace you could hold for an hour.' : /fartlek|fast/.test(x) ? 'The fast minutes are about ' + pmi(P.i) + '.' : '');
+  else if (pl.t === 'Q') tx = 'Total ' + f0(pl.mi) + ' mi including an easy warm-up and cool-down' + (/^Track/.test(x) ? ' (add 4 to 6 strides before the first rep)' : '') + '. ' + (/^Track/.test(x) ? '5K pace is about ' + pmi(P.i) + ' (' + ptime(P.i * 400 / 1609.344) + ' per 400 m, ' + ptime(P.i * 800 / 1609.344) + ' per 800 m). 10K pace is about ' + pmi(P.k) + ' (' + ptime(P.k * 1000 / 1609.344) + ' per 1000 m, ' + ptime(P.k * 1200 / 1609.344) + ' per 1200 m, ' + ptime(P.k * 1600 / 1609.344) + ' per 1600 m). ' + (/Michigan/.test(x) ? 'Run the 2 km tempo sections at about ' + pmi(P.t) + ' without stopping, so the whole session is one continuous effort. ' : '') + 'Even effort, with the last rep no slower than the first. Jog the recoveries.' : /marathon pace/.test(x) ? 'Marathon pace is ' + pmi(P.mp) + '.' : /threshold|tempo/.test(x) ? 'Threshold pace is about ' + pmi(P.t) + ', comfortably hard, a pace you could hold for an hour.' : /fartlek|fast/.test(x) ? 'The fast minutes are about ' + pmi(P.i) + '.' : '');
   else if (pl.t === 'G') tx = 'Start at ' + pmi(P.mp + 5) + ' for the first 3 miles, settle to ' + pmi(P.mp) + ', and save the effort for after mile 20.';
   return tx;
 }
