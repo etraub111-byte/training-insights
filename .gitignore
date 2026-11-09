@@ -1,0 +1,8 @@
+.env
+*.db
+data/
+dashboard.html
+site/
+__pycache__/
+logs/
+.DS_Store

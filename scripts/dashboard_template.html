@@ -1,0 +1,1299 @@
+<meta charset="utf-8">
+<title>Training Insights</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: instrument panel. A sticky filter bar scopes every tab; each tab is a stack of quiet chart cards.
+   Color: validated categorical slots (blue, orange, aqua) identify sport; one blue ramp carries magnitude; status colors only for state.
+   Type: IBM Plex Sans for reading, IBM Plex Mono for axis ticks and figures in tables. */
+:root {
+  --bg: #f9f9f7; --surface: #fcfcfb; --ink: #0b0b0b; --ink2: #52514e; --muted: #898781;
+  --grid: #e1e0d9; --axis: #c3c2b7; --border: rgba(11,11,11,.10); --wash: rgba(11,11,11,.045);
+  --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --s4: #eda100; --s5: #e87ba4;
+  --good: #0ca30c; --warn: #fab219; --serious: #ec835a; --crit: #d03b3b; --good-text: #006300;
+  --z1: #86b6ef; --z2: #2a78d6; --z3: #104281;
+  --h0: #edeceb; --h1: #cde2fb; --h2: #9ec5f4; --h3: #6da7ec; --h4: #3987e5; --h5: #1c5cab; --h6: #0d366b;
+  --on-fill: #ffffff; --accent: #2a78d6;
+  --wash-a: rgba(42,120,214,.075); --shadow: 0 1px 2px rgba(11,11,11,.04), 0 8px 20px -10px rgba(11,11,11,.10); --r: 14px;
+  --t-e: #1baf7a; --t-m: #eda100; --t-h: #eb6834; --t-l: #2a78d6; --t-x: #6250d6; --t-r: #e34948;
+  --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0d0d0d; --surface: #1a1a19; --ink: #f0efec; --ink2: #c3c2b7; --muted: #898781;
+    --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,.10); --wash: rgba(255,255,255,.05);
+    --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500; --s5: #d55181;
+    --good-text: #0ca30c;
+    --z1: #184f95; --z2: #3987e5; --z3: #9ec5f4;
+    --h0: #242422; --h1: #184f95; --h2: #1c5cab; --h3: #256abf; --h4: #3987e5; --h5: #6da7ec; --h6: #9ec5f4;
+    --accent: #3987e5; color-scheme: dark; --wash-a: rgba(57,135,229,.14); --shadow: 0 1px 2px rgba(0,0,0,.35), 0 10px 26px -12px rgba(0,0,0,.6);
+  --t-e: #199e70; --t-m: #c98500; --t-h: #d95926; --t-l: #3987e5; --t-x: #9085e9; --t-r: #e66767;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0d0d0d; --surface: #1a1a19; --ink: #f0efec; --ink2: #c3c2b7; --muted: #898781;
+  --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,.10); --wash: rgba(255,255,255,.05);
+  --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500; --s5: #d55181;
+  --good-text: #0ca30c;
+  --z1: #184f95; --z2: #3987e5; --z3: #9ec5f4;
+  --h0: #242422; --h1: #184f95; --h2: #1c5cab; --h3: #256abf; --h4: #3987e5; --h5: #6da7ec; --h6: #9ec5f4;
+  --accent: #3987e5; color-scheme: dark; --wash-a: rgba(57,135,229,.14); --shadow: 0 1px 2px rgba(0,0,0,.35), 0 10px 26px -12px rgba(0,0,0,.6);
+  --t-e: #199e70; --t-m: #c98500; --t-h: #d95926; --t-l: #3987e5; --t-x: #9085e9; --t-r: #e66767;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { background: var(--bg); color: var(--ink); font: 14px/1.5 var(--sans); margin: 0; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); background: var(--surface); z-index: 30; }
+.wrap { max-width: 1180px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+header.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: var(--surface); border-bottom: 1px solid var(--border); }
+@supports (backdrop-filter: blur(8px)) { header.top { background: color-mix(in srgb, var(--surface) 88%, transparent); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); } }
+.bar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 20px; padding-block: 12px 8px; }
+.brand { display: flex; align-items: center; gap: 12px; min-width: 0; margin-right: auto; }
+.logo { flex: none; width: 34px; height: 34px; border-radius: 10px; background: var(--ink); color: var(--bg); display: grid; place-items: center; }
+.logo svg { width: 20px; height: 20px; }
+.brand .bt { min-width: 0; }
+.brand h1 { font-size: 17px; font-weight: 600; margin: 0; letter-spacing: -.015em; white-space: nowrap; line-height: 1.2; }
+.brand #cov { display: block; color: var(--muted); font-size: 12px; font-family: var(--mono); margin-top: 1px; }
+.ctl { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
+.seg { display: inline-flex; gap: 2px; padding: 3px; border: 1px solid var(--border); border-radius: 999px; background: var(--bg); }
+.seg button { font: 500 12px var(--sans); color: var(--ink2); background: none; border: 0; border-radius: 999px; padding: 5px 12px; cursor: pointer; min-height: 30px; transition: background .12s, color .12s; }
+.seg button:last-child { border-right: 0; }
+.seg button:hover { background: var(--wash); }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+.dates { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: 12px; }
+.dates input { font: 12px var(--mono); color: var(--ink); background: var(--bg); border: 1px solid var(--border); border-radius: 999px; padding: 5px 12px; min-height: 36px; min-width: 0; width: 134px; }
+.icon { font: 500 12px var(--sans); color: var(--ink2); background: var(--bg); border: 1px solid var(--border); border-radius: 999px; padding: 6px 14px; cursor: pointer; min-height: 36px; }
+.icon:hover { background: var(--wash); }
+button:focus-visible, input:focus-visible, summary:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+nav.tabs { display: flex; gap: 2px; overflow-x: auto; scrollbar-width: none; padding-bottom: 0; }
+nav.tabs { padding: 2px 0 12px; }
+nav.tabs a { font-weight: 500; font-size: 13px; color: var(--ink2); text-decoration: none; padding: 7px 14px; border-radius: 999px; white-space: nowrap; }
+nav.tabs a:hover { color: var(--ink); background: var(--wash); }
+nav.tabs a[aria-current="page"] { color: var(--ink); background: var(--wash); box-shadow: inset 0 0 0 1px var(--border); }
+main { padding-block: 26px 72px; display: flex; flex-direction: column; gap: 22px; }
+.note { color: var(--ink2); font-size: 13px; max-width: 78ch; margin: 0; }
+.note strong { color: var(--ink); font-weight: 600; }
+.row { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 330px), 1fr)); }
+.row.wide { grid-template-columns: 1fr; }
+.tiles { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(158px, 1fr)); }
+.tile { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); box-shadow: var(--shadow); padding: 15px 16px; min-width: 0; }
+.tile .l { color: var(--ink2); font-size: 12px; }
+.tile .v { font-size: 30px; font-weight: 500; letter-spacing: -.025em; margin-top: 4px; line-height: 1.1; }
+.tile .v small { font-size: 13px; color: var(--ink2); font-weight: 400; margin-left: 3px; letter-spacing: 0; }
+.tile .d { font: 12px var(--mono); color: var(--ink2); margin-top: 4px; }
+.tile .d.txt { font: 12.5px/1.45 var(--sans); }
+.tile .d.good { color: var(--good-text); }
+.tile .d.bad { color: var(--crit); }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); box-shadow: var(--shadow); padding: 18px 18px 12px; min-width: 0; }
+.card h2, h2.sec { font-size: 14px; font-weight: 600; margin: 0; letter-spacing: -.005em; }
+h2.sec { font-size: 17px; letter-spacing: -.015em; margin-top: 6px; }
+.card .sub { color: var(--ink2); font-size: 12px; margin: 2px 0 8px; max-width: 80ch; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 0 0 6px; font-size: 12px; color: var(--ink2); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.k-line { width: 14px; height: 2px; border-radius: 1px; }
+.k-box { width: 10px; height: 10px; border-radius: 2px; }
+.k-dot { width: 8px; height: 8px; border-radius: 50%; }
+.chart { width: 100%; position: relative; }
+.chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+.chart text { font-family: var(--mono); font-size: 11px; fill: var(--muted); }
+details.tbl { margin-top: 6px; }
+details.tbl summary { cursor: pointer; font-size: 12px; color: var(--ink2); padding: 4px 0; width: max-content; }
+.tscroll { overflow-x: auto; max-height: 280px; overflow-y: auto; border-top: 1px solid var(--border); margin-top: 4px; }
+table { border-collapse: collapse; width: 100%; font-size: 12.5px; }
+th, td { text-align: left; padding: 6px 10px 6px 0; border-bottom: 1px solid var(--border); white-space: nowrap; vertical-align: top; }
+th { color: var(--ink2); font-weight: 500; font-size: 12px; position: sticky; top: 0; background: var(--surface); }
+td.n, th.n { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; padding-right: 12px; }
+td.wrap-ok { white-space: normal; min-width: 180px; }
+tr.base td { color: var(--ink2); font-style: italic; }
+.tbl-wrap { overflow-x: auto; }
+.pill { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; padding: 2px 9px 2px 8px; border-radius: 999px; border: 1px solid var(--border); white-space: nowrap; }
+.pill i { width: 8px; height: 8px; display: inline-block; }
+.pill.good i { background: var(--good); border-radius: 50%; }
+.pill.warn i { background: var(--warn); transform: rotate(45deg); }
+.pill.serious i { background: var(--serious); border-radius: 1px; }
+.pill.crit i { background: var(--crit); clip-path: polygon(50% 0, 100% 100%, 0 100%); }
+.pill.neutral i { background: var(--muted); border-radius: 50%; }
+.status { display: grid; gap: 0; }
+.status .r { display: grid; grid-template-columns: minmax(120px, 1.2fr) minmax(80px, 1fr) 2fr; gap: 6px 12px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); }
+.status .r:last-child { border-bottom: 0; }
+.status .r .a { color: var(--ink2); }
+.status .r .b { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.status .r .c { color: var(--ink2); font-size: 12.5px; }
+@media (max-width: 560px) { .status .r { grid-template-columns: 1fr auto; } .status .r .c { grid-column: 1 / -1; } }
+.heat { display: grid; grid-template-columns: 42px repeat(12, minmax(0, 1fr)); gap: 3px; align-items: center; font: 11px var(--mono); color: var(--muted); }
+.heat .cell { aspect-ratio: 2.6; min-height: 14px; border-radius: 3px; background: var(--h0); }
+.heat .cell:hover { outline: 2px solid var(--ink); outline-offset: 1px; }
+.heat .hd { text-align: center; }
+.ramp { display: flex; align-items: center; gap: 6px; font: 11px var(--mono); color: var(--muted); margin-top: 8px; }
+.ramp i { display: inline-block; width: 22px; height: 8px; border-radius: 2px; }
+#tip { position: fixed; z-index: 50; pointer-events: none; opacity: 0; background: var(--surface); color: var(--ink); border: 1px solid var(--axis); border-radius: 8px; padding: 8px 10px; font-size: 12px; box-shadow: 0 6px 20px rgba(0,0,0,.14); max-width: 280px; transition: opacity .08s; }
+#tip .h { color: var(--ink2); margin-bottom: 4px; font-family: var(--mono); font-size: 11px; }
+#tip .t { display: flex; align-items: center; gap: 8px; line-height: 1.6; }
+#tip .t b { font-weight: 600; margin-left: auto; padding-left: 12px; font-family: var(--mono); font-variant-numeric: tabular-nums; }
+#tip .x { color: var(--ink2); margin-top: 3px; }
+.stackbar { display: flex; height: 8px; border-radius: 4px; overflow: hidden; gap: 2px; margin-top: 4px; }
+.stackbar i { display: block; height: 100%; }
+.empty { color: var(--muted); font-size: 13px; padding: 22px 0; text-align: center; }
+ul.plain { margin: 0; padding-left: 18px; color: var(--ink2); font-size: 13px; max-width: 80ch; }
+ul.plain li { margin: 4px 0; }
+code { font-family: var(--mono); font-size: 12px; background: var(--wash); padding: 1px 5px; border-radius: 4px; }
+.sechead { margin-top: 10px; }
+.sechead p { margin: 2px 0 0; color: var(--muted); font-size: 13px; }
+.hero { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 28px; padding: 30px; border-radius: 20px; border: 1px solid var(--border); box-shadow: var(--shadow); background: radial-gradient(120% 140% at 100% 0%, var(--wash-a), transparent 60%), var(--surface); }
+.eyebrow { font: 500 11.5px var(--mono); color: var(--muted); letter-spacing: .06em; text-transform: uppercase; }
+.hero h2 { font-size: clamp(26px, 3.6vw, 38px); line-height: 1.1; letter-spacing: -.025em; font-weight: 600; margin: 10px 0 12px; }
+.hero p { color: var(--ink2); font-size: 15px; line-height: 1.55; max-width: 54ch; margin: 0 0 8px; }
+.hero-stats { display: flex; flex-wrap: wrap; gap: 10px 32px; margin-top: 22px; }
+.hero-stats div { min-width: 0; }
+.hero-stats b { display: block; font: 500 22px var(--sans); letter-spacing: -.02em; }
+.hero-stats span { color: var(--muted); font-size: 12px; }
+.hero-r { display: flex; flex-direction: column; justify-content: flex-end; min-width: 0; }
+.hero .big { font-size: 64px; font-weight: 500; letter-spacing: -.035em; line-height: 1; margin: 6px 0 2px; }
+.hero .cap { color: var(--ink2); font-size: 13px; margin-bottom: 14px; }
+.spark svg { display: block; width: 100%; height: auto; overflow: visible; }
+.stat-grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); }
+.stat { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); box-shadow: var(--shadow); padding: 15px 16px; display: flex; flex-direction: column; gap: 8px; align-items: flex-start; min-width: 0; }
+.stat .a { color: var(--ink2); font-size: 12.5px; }
+.stat .b { font-size: 26px; font-weight: 500; letter-spacing: -.02em; line-height: 1.1; }
+.stat .c { color: var(--muted); font-size: 12px; line-height: 1.45; margin: 0; }
+@media (max-width: 560px) { .stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .stat .c { display: none; } .stat .b { font-size: 22px; } }
+@media (max-width: 760px) { .hero { grid-template-columns: 1fr; padding: 22px 20px; gap: 20px; } .hero .big { font-size: 56px; } }
+
+body.mar #presets, body.mar .dates, body.mar #sports { display: none; }
+.stackv { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.mhero .big { font-size: 80px; letter-spacing: -.04em; }
+.mhero .phase { font-weight: 600; font-size: 15px; margin: 2px 0 12px; }
+.mhero .hint { color: var(--muted); font-size: 12.5px; margin-top: 8px; }
+.mhero .ghint { color: var(--ink2); font-size: 13px; margin: 14px 0 0; max-width: 46ch; }
+.mhero .hero-r { justify-content: flex-start; gap: 8px; }
+.mhero select { font: 500 15px var(--sans); color: var(--ink); background: var(--bg); border: 1px solid var(--border); border-radius: 999px; padding: 8px 16px; min-height: 40px; width: max-content; max-width: 100%; }
+.mhero .hero-stats { margin-top: 14px; gap: 10px 26px; }
+.meter { height: 8px; border-radius: 999px; background: var(--wash); overflow: hidden; max-width: 420px; }
+.meter i { display: block; height: 100%; background: var(--accent); border-radius: 999px; }
+.meter.thin { height: 5px; max-width: none; }
+.mviews { align-self: flex-start; flex-wrap: wrap; border-radius: 18px; }
+.calnav { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; margin-bottom: 10px; }
+.calnav .seg { margin-left: auto; }
+.calnav .icon:disabled { opacity: .35; cursor: default; }
+.calt { font-size: 22px; letter-spacing: -.025em; margin: 0 8px; min-width: 9.5ch; font-weight: 600; }
+.mlegend { margin: 4px 0 12px; gap: 6px 16px; }
+.k-dash { display: inline-block; width: 14px; height: 10px; border: 1.5px dashed var(--ink2); border-radius: 3px; }
+.cal { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)) minmax(104px, .85fr); gap: 6px; padding-bottom: 8px; }
+.cal .wd { font: 500 11.5px var(--mono); color: var(--muted); padding: 0 4px 2px; }
+.day { min-height: 98px; border: 1px solid var(--border); border-radius: 12px; padding: 6px 6px 7px; background: var(--bg); display: flex; flex-direction: column; gap: 4px; cursor: pointer; min-width: 0; }
+.day:hover { background: var(--wash); }
+.day.out { opacity: .4; }
+.day.today { box-shadow: inset 0 0 0 2px var(--accent); }
+.day.sel { outline: 2px solid var(--ink); outline-offset: 1px; }
+.day.race { background: color-mix(in srgb, var(--t-r) 10%, var(--bg)); }
+.dtop { display: flex; justify-content: space-between; align-items: baseline; gap: 4px; }
+.dn { font: 500 11.5px var(--mono); color: var(--ink2); }
+.dp { font: 10.5px var(--mono); color: var(--muted); white-space: nowrap; }
+.cp { --c: var(--ink2); display: flex; align-items: center; gap: 5px; border-radius: 7px; padding: 2px 6px; font: 600 11.5px/1.4 var(--sans); min-width: 0; }
+.cp .ck { font: 700 10px var(--mono); opacity: .9; }
+.cp .cv { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.t-E { --c: var(--t-e); } .t-M { --c: var(--t-m); } .t-H { --c: var(--t-h); } .t-L { --c: var(--t-l); } .t-X { --c: var(--t-x); } .t-R { --c: var(--t-r); }
+.cp.done { background: var(--c); color: #fff; }
+.cp.done.t-M { color: #0b0b0b; }
+.cp.plan { border: 1.5px dashed var(--c); background: color-mix(in srgb, var(--c) 9%, transparent); color: var(--ink2); padding: 0 5px; }
+.skip, .rest, .more { font-size: 11px; color: var(--muted); }
+.skip { font-style: italic; }
+.wsc { border-radius: 12px; padding: 8px 10px; background: var(--wash); display: flex; flex-direction: column; gap: 4px; justify-content: center; min-width: 0; }
+.wsc.cur { background: var(--wash-a); box-shadow: inset 0 0 0 1px var(--border); }
+.wsc .wl { font-size: 11px; color: var(--muted); }
+.wsc .wv b { font-size: 20px; letter-spacing: -.02em; font-weight: 600; }
+.wsc .wv span { font-size: 11.5px; color: var(--ink2); }
+.detail .dh { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-bottom: 8px; }
+.dcols { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding-bottom: 8px; }
+.dcol p { margin: 6px 0 0; font-size: 13.5px; }
+.dcol p.muted, .muted { color: var(--ink2); font-size: 12.5px; }
+.dline { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+.dline .cp { padding: 3px 9px; }
+.act + .act { margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--border); }
+.dnote { border-left: 3px solid var(--t-h); padding-left: 10px; color: var(--ink) !important; }
+.next7 { display: grid; grid-template-columns: repeat(auto-fit, minmax(128px, 1fr)); gap: 10px; }
+.nd { --c: var(--axis); text-align: left; border: 1px solid var(--border); border-left: 4px solid var(--c); background: var(--surface); box-shadow: var(--shadow); border-radius: 12px; padding: 10px 11px; cursor: pointer; font: inherit; color: inherit; min-width: 0; }
+.nd:hover { background: var(--wash); }
+.ndh { display: flex; justify-content: space-between; font-size: 12px; color: var(--ink2); }
+.ndh b { color: var(--ink); }
+.ndm { font-size: 22px; font-weight: 500; letter-spacing: -.02em; margin: 4px 0 2px; }
+.ndd { font-size: 12px; color: var(--ink2); line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.phases { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; }
+.ph { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); box-shadow: var(--shadow); padding: 14px 16px; display: flex; flex-direction: column; gap: 2px; }
+.ph b { font-size: 15px; }
+.ph span { color: var(--ink2); font: 12px var(--mono); }
+.ph p { margin: 6px 0 0; color: var(--ink2); font-size: 12.5px; }
+.callout { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; background: var(--surface); border: 1px solid var(--border); border-left: 5px solid var(--good); border-radius: var(--r); box-shadow: var(--shadow); padding: 14px 18px; }
+.callout.warn { border-left-color: var(--warn); } .callout.serious { border-left-color: var(--crit); }
+.callout p { margin: 0; color: var(--ink2); flex: 1 1 280px; }
+.coach { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 430px), 1fr)); gap: 14px; }
+.cc { padding-bottom: 16px; }
+.cch { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; }
+.cc .ev { color: var(--ink); margin: 10px 0 8px; font-size: 13.5px; }
+.cc .ac { color: var(--ink2); margin: 0; font-size: 13px; }
+.cc .ac b { color: var(--ink); }
+@media (max-width: 760px) { .mhero .big { font-size: 64px; } .dcols { grid-template-columns: 1fr; gap: 14px; } }
+@media (max-width: 640px) {
+  .cal { grid-template-columns: repeat(7, minmax(0, 1fr)) 50px; gap: 3px; }
+  .day { min-height: 62px; padding: 4px 3px; gap: 3px; border-radius: 8px; }
+  .dp, .cp .ck, .rest, .skip, .more, .wsc .wl, .wsc .wv span, .wsc .meter { display: none; }
+  .cp { padding: 2px 3px; font-size: 10.5px; justify-content: center; border-radius: 5px; }
+  .cp.plan { padding: 1px 2px; }
+  .wsc { padding: 4px; border-radius: 8px; align-items: center; }
+  .wsc .wv b { font-size: 14px; }
+  .calt { font-size: 18px; min-width: 0; }
+  .calnav .seg { margin-left: 0; }
+  .cal .wd { font-size: 10px; padding: 0 1px; text-align: center; }
+  .day { min-height: 74px; align-items: stretch; }
+  .dn { font-size: 13px; font-weight: 600; color: var(--ink); }
+  .day.today .dn { color: var(--accent); }
+  .cp { font-size: 11.5px; font-weight: 700; padding: 3px 0; letter-spacing: -.03em; }
+  .cp .cv { text-overflow: clip; }
+  .cp.plan { padding: 2px 1px; }
+  .wsc .wv b { font-size: 15px; }
+  .mviews { align-self: stretch; flex-wrap: nowrap; overflow-x: auto; max-width: 100%; border-radius: 999px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+  .mviews::-webkit-scrollbar, .calnav .seg::-webkit-scrollbar { display: none; }
+  .mviews button { white-space: nowrap; min-height: 38px; padding: 6px 14px; font-size: 13px; flex: 0 0 auto; }
+  .calnav .seg { order: 5; flex: 1 1 100%; overflow-x: auto; scrollbar-width: none; flex-wrap: nowrap; }
+  .calnav .seg button { white-space: nowrap; min-height: 36px; flex: 1 0 auto; }
+  .calnav .icon { min-width: 44px; min-height: 40px; }
+  .calnav { gap: 8px; }
+  .calt { flex: 1; text-align: center; margin: 0; }
+  .next7 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .wkt th, .wkt td { padding-left: 5px; padding-right: 5px; font-size: 12px; white-space: nowrap; }
+  .wkt td:nth-child(2) { white-space: normal; min-width: 64px; }
+  .wkt .pill i { display: none; }
+  .wkt .pill { padding: 2px 8px; }
+  .wkt th:nth-child(3), .wkt td:nth-child(3), .wkt th:nth-child(6), .wkt td:nth-child(6), .wkt th:nth-child(7), .wkt td:nth-child(7), .wkt th:nth-child(8), .wkt td:nth-child(8) { display: none; }
+  .nd { min-height: 64px; }
+  .cc, .ph, .detail { overflow-wrap: anywhere; }
+}
+@media (max-width: 719px) { header.top { position: static; } }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<header class="top">
+  <div class="wrap">
+    <div class="bar">
+      <div class="brand"><span class="logo" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l5-6 4 3 8-9"/><path d="M15 5h5v5"/></svg></span><div class="bt"><h1>Training Insights</h1><span id="cov"></span></div></div>
+      <div class="ctl">
+        <div class="seg" id="presets" role="group" aria-label="Date range"></div>
+        <div class="dates"><input type="date" id="from" aria-label="From date"><span>to</span><input type="date" id="to" aria-label="To date"></div>
+        <div class="seg" id="sports" role="group" aria-label="Sport"></div>
+        <button class="icon" id="theme" type="button" aria-label="Switch color theme">Theme</button>
+      </div>
+    </div>
+    <nav class="tabs" id="tabs" aria-label="Sections"></nav>
+  </div>
+</header>
+<div class="wrap"><main id="app"></main></div>
+<div id="tip" role="status" aria-live="polite"></div>
+<script id="data" type="application/json">__DATA__</script>
+<script>
+(function () {
+'use strict';
+var DATA = JSON.parse(document.getElementById('data').textContent);
+var D = DATA.daily, N = D.dates.length, META = DATA.meta, INS = DATA.insights;
+function dn(s) { return Date.UTC(+s.slice(0, 4), +s.slice(5, 7) - 1, +s.slice(8, 10)) / 864e5; }
+var DAY = D.dates.map(dn), DAY0 = DAY[0], DAYN = DAY[N - 1];
+var GN = { Run: 'Run', Ride: 'Ride', Hike: 'Hike', Swim: 'Other', Other: 'Other' };
+var SPORTS = ['Run', 'Ride', 'Hike', 'Other'];
+var SPC = { Run: 'var(--s1)', Ride: 'var(--s2)', Hike: 'var(--s3)', Other: 'var(--muted)' };
+var A = DATA.activities.map(function (a) { a.dn = dn(a.date); a.sp = GN[a.group]; if (a.ef != null && a.ef_basis === 'm/min per bpm') a.ef = a.ef * M2FT; return a; });
+var KM2MI = 0.621371, M2FT = 3.28084;
+function mi(km) { return km * KM2MI; }
+function ft(m) { return m * M2FT; }
+var BASIS = { '3k': '1.9 mi', '5k': '3.1 mi', '10k': '6.2 mi', '15k': '9.3 mi', '21.0975k': '13.1 mi', '20min': '20 min', '30min': '30 min', '60min': '60 min' };
+function basisLbl(b) { return BASIS[b] || b; }
+var MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+/* ---------- formatting ---------- */
+function f0(v) { return Math.round(v).toLocaleString('en-US'); }
+function f1(v) { return (Math.round(v * 10) / 10).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }); }
+function f2(v) { return (Math.round(v * 100) / 100).toFixed(2); }
+function dstr(n) { return new Date(n * 864e5).toISOString().slice(0, 10); }
+function dlabel(n) { var d = new Date(n * 864e5); return MON[d.getUTCMonth()] + ' ' + d.getUTCDate() + ', ' + d.getUTCFullYear(); }
+function ptime(s) { s = Math.round(s); var h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), x = s % 60; return h ? h + ':' + String(m).padStart(2, '0') + ':' + String(x).padStart(2, '0') : m + ':' + String(x).padStart(2, '0'); }
+function pct(v) { return Math.round(v * 100) + '%'; }
+function sgn(v, d) { return (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v).toFixed(d); }
+function mean(a) { var s = 0, n = 0; for (var i = 0; i < a.length; i++) if (a[i] != null && !isNaN(a[i])) { s += a[i]; n++; } return n ? s / n : null; }
+function sum(a) { var s = 0; for (var i = 0; i < a.length; i++) if (a[i] != null) s += a[i]; return s; }
+function median(a) { var b = a.filter(function (v) { return v != null && !isNaN(v); }).sort(function (x, y) { return x - y; }); if (!b.length) return null; var m = b.length >> 1; return b.length % 2 ? b[m] : (b[m - 1] + b[m]) / 2; }
+function pctl(a, p) { var b = a.filter(function (v) { return v != null && !isNaN(v); }).sort(function (x, y) { return x - y; }); if (!b.length) return null; var k = (b.length - 1) * p, f = Math.floor(k), c = Math.ceil(k); return b[f] + (b[c] - b[f]) * (k - f); }
+function secTicks(lo, hi) { var steps = [5, 10, 15, 30, 60, 120, 300, 600, 900, 1800, 3600], st_ = steps[steps.length - 1]; for (var i = 0; i < steps.length; i++) if ((hi - lo) / steps[i] <= 6) { st_ = steps[i]; break; } var a = Math.floor(lo / st_) * st_, b = Math.ceil(hi / st_) * st_, t = []; for (var v = a; v <= b + 1e-6; v += st_) t.push(v); return { ticks: t, lo: a, hi: b }; }
+function roll(arr, n, min) { var out = [], s = 0, c = 0; for (var i = 0; i < arr.length; i++) { var v = arr[i]; if (v != null && !isNaN(v)) { s += v; c++; } if (i >= n) { var o = arr[i - n]; if (o != null && !isNaN(o)) { s -= o; c--; } } out.push(c >= (min || 1) ? s / c : null); } return out; }
+function rollMedianPts(xs, ys, w, minN) { var out = []; for (var i = 0; i < xs.length; i++) { var v = []; for (var j = 0; j < xs.length; j++) if (Math.abs(xs[j] - xs[i]) <= w) v.push(ys[j]); out.push(v.length >= minN ? median(v) : null); } return out; }
+
+/* ---------- state ---------- */
+var st = { from: DAY0, to: DAYN, sport: 'All', preset: 'All', tab: 'overview', theme: 'system' };
+var TABS = [['overview', 'Overview'], ['marathon', 'Kyoto Marathon'], ['fitness', 'Fitness and form'], ['performance', 'Performance'], ['recovery', 'Recovery'], ['sports', 'Sports'], ['records', 'Records'], ['insights', 'Insights'], ['method', 'Method']];
+var PRESETS = [['30D', 30], ['90D', 90], ['6M', 182], ['1Y', 365], ['3Y', 1095], ['All', 0]];
+
+/* ---------- derived series ---------- */
+var FITC = {};
+function loadFor(sport) {
+  if (sport === 'All') return D.load;
+  var keys = sport === 'Other' ? ['load_Swim', 'load_Other'] : ['load_' + sport];
+  return DAY.map(function (_, i) { return keys.reduce(function (s, k) { return s + (D[k][i] || 0); }, 0); });
+}
+function fit(sport) {
+  if (FITC[sport]) return FITC[sport];
+  var L = loadFor(sport), ka = 1 - Math.exp(-1 / 7), kc = 1 - Math.exp(-1 / 42), atl = 0, ctl = 0;
+  var o = { L: L, atl: [], ctl: [], tsb: [], acwr: [], ramp: [] }, pre = [0];
+  for (var i = 0; i < N; i++) { pre.push(pre[i] + L[i]); }
+  for (i = 0; i < N; i++) {
+    o.tsb.push(ctl - atl); atl += (L[i] - atl) * ka; ctl += (L[i] - ctl) * kc; o.atl.push(atl); o.ctl.push(ctl);
+    var ac = i >= 6 ? pre[i + 1] - pre[i - 6] : null, ch = i >= 27 ? (pre[i + 1] - pre[i - 27]) / 4 : null;
+    o.acwr.push(ac != null && ch >= 30 ? ac / ch : null);   // ratio is meaningless when the 28 day base is under 30 TRIMP a week
+    o.ramp.push(i >= 7 ? o.ctl[i] - o.ctl[i - 7] : null);
+  }
+  return (FITC[sport] = o);
+}
+function actsIn(from, to, sport) { return A.filter(function (a) { return a.dn >= from && a.dn <= to && (sport === 'All' || a.sp === sport); }); }
+function idx(dayNum) { return Math.max(0, Math.min(N - 1, dayNum - DAY0)); }
+function slice(arr, i0, i1) { return arr.slice(i0, i1 + 1); }
+function buckets(from, to) {
+  var out = [], span = to - from + 1;
+  if (span <= 420) { var s = from - (((from + 3) % 7) + 7) % 7; while (s <= to) { out.push({ s: s, e: s + 7 }); s += 7; } }
+  else { var d = new Date(from * 864e5), y = d.getUTCFullYear(), m = d.getUTCMonth(); for (;;) { var s2 = Date.UTC(y, m, 1) / 864e5, e2 = Date.UTC(y, m + 1, 1) / 864e5; if (s2 > to) break; out.push({ s: s2, e: e2 }); m++; if (m > 11) { m = 0; y++; } } }
+  return out;
+}
+function bIndex(bs, x) { var lo = 0, hi = bs.length - 1; while (lo <= hi) { var mid = (lo + hi) >> 1; if (x < bs[mid].s) hi = mid - 1; else if (x >= bs[mid].e) lo = mid + 1; else return mid; } return -1; }
+
+/* ---------- dom helpers ---------- */
+var NS = 'http://www.w3.org/2000/svg';
+function S(tag, attrs, parent) { var e = document.createElementNS(NS, tag); for (var k in attrs) { if (k === 'style') e.style.cssText = attrs[k]; else if (k === 'text') e.textContent = attrs[k]; else e.setAttribute(k, attrs[k]); } if (parent) parent.appendChild(e); return e; }
+function H(tag, attrs, kids) { var e = document.createElement(tag); if (attrs) for (var k in attrs) { if (k === 'text') e.textContent = attrs[k]; else if (k === 'class') e.className = attrs[k]; else e.setAttribute(k, attrs[k]); } (kids || []).forEach(function (c) { if (c != null) e.appendChild(typeof c === 'string' ? document.createTextNode(c) : c); }); return e; }
+var app = document.getElementById('app'), tipEl = document.getElementById('tip');
+function showTip(cx, cy, head, rows, extra) {
+  tipEl.textContent = '';
+  tipEl.appendChild(H('div', { class: 'h', text: head }));
+  rows.forEach(function (r) {
+    var line = H('div', { class: 't' });
+    if (r.color) { var key = H('span', { class: r.shape === 'box' ? 'k-box' : r.shape === 'dot' ? 'k-dot' : 'k-line' }); key.style.background = r.color; line.appendChild(key); }
+    line.appendChild(H('span', { text: r.name })); line.appendChild(H('b', { text: r.value })); tipEl.appendChild(line);
+  });
+  if (extra) tipEl.appendChild(H('div', { class: 'x', text: extra }));
+  tipEl.style.opacity = 1;
+  var w = tipEl.offsetWidth, h = tipEl.offsetHeight, x = cx + 14, y = cy + 14;
+  if (x + w > innerWidth - 8) x = cx - w - 14; if (x < 8) x = 8;
+  if (y + h > innerHeight - 8) y = cy - h - 14; if (y < 8) y = 8;
+  tipEl.style.left = x + 'px'; tipEl.style.top = y + 'px';
+}
+function hideTip() { tipEl.style.opacity = 0; }
+
+/* ---------- scales and ticks ---------- */
+function niceTicks(lo, hi, n) {
+  if (!(hi > lo)) { hi = lo + 1; }
+  var raw = (hi - lo) / n, mag = Math.pow(10, Math.floor(Math.log10(raw))), nm = raw / mag, step = (nm < 1.5 ? 1 : nm < 3 ? 2 : nm < 7 ? 5 : 10) * mag, t = [];
+  var a = Math.floor(lo / step + 1e-9) * step, b = Math.ceil(hi / step - 1e-9) * step;
+  for (var v = a; v <= b + step * 1e-6; v += step) t.push(+v.toFixed(10));
+  return { ticks: t, lo: a, hi: b };
+}
+function timeTicks(x0, x1) {
+  var span = x1 - x0, out = [], d0 = new Date(x0 * 864e5), y, m;
+  if (span > 2.2 * 365) {
+    var step = span > 9 * 365 ? 2 : 1; y = d0.getUTCFullYear();
+    for (; ; y++) { var v = Date.UTC(y, 0, 1) / 864e5; if (v > x1) break; if (v >= x0 && y % step === 0) out.push({ v: v, label: String(y) }); }
+  } else if (span > 75) {
+    var sm = span <= 200 ? 1 : span <= 420 ? 2 : 3; y = d0.getUTCFullYear(); m = d0.getUTCMonth();
+    for (; ; ) { var vv = Date.UTC(y, m, 1) / 864e5; if (vv > x1) break; if (vv >= x0 && m % sm === 0) out.push({ v: vv, label: m === 0 ? String(y) : MON[m] }); m++; if (m > 11) { m = 0; y++; } }
+  } else {
+    var s = x0 + ((7 - ((x0 + 3) % 7)) % 7); for (; s <= x1; s += (span > 40 ? 14 : 7)) { var dd = new Date(s * 864e5); out.push({ v: s, label: MON[dd.getUTCMonth()] + ' ' + dd.getUTCDate() }); }
+  }
+  return out;
+}
+
+/* ---------- chart engine ---------- */
+function timeChart(host, spec) {
+  host.textContent = '';
+  var W = Math.max(280, host.clientWidth || 600), Hh = spec.h || 240;
+  var m = { l: spec.yFmtWide ? 56 : 46, r: spec.endLabel ? 56 : 14, t: 10, b: 24 }, iw = W - m.l - m.r, ih = Hh - m.t - m.b;
+  var svg = S('svg', { viewBox: '0 0 ' + W + ' ' + Hh, role: 'img', 'aria-label': spec.aria || spec.title || 'chart' }, host);
+  var series = spec.series.filter(function (s) { return s.x && s.x.length; });
+  var x0 = spec.x0, x1 = spec.x1;
+  var lo = Infinity, hi = -Infinity;
+  series.forEach(function (s) {
+    if (s.kind === 'bars' && spec.stack) return;
+    s.y.forEach(function (v, i) { if (v != null && !isNaN(v)) { if (v < lo) lo = v; if (v > hi) hi = v; } if (s.y2 && s.y2[i] != null) { if (s.y2[i] < lo) lo = s.y2[i]; if (s.y2[i] > hi) hi = s.y2[i]; } });
+  });
+  if (spec.stack) { var bs0 = series.filter(function (s) { return s.kind === 'bars'; }); if (bs0.length) bs0[0].x.forEach(function (_, i) { var t = 0; bs0.forEach(function (s) { t += s.y[i] || 0; }); if (t > hi) hi = t; }); if (lo > 0) lo = 0; }
+  (spec.refs || []).forEach(function (r) { if (spec.refsInDomain) { if (r.y < lo) lo = r.y; if (r.y > hi) hi = r.y; } });
+  if (spec.band2) { spec.band2.lo.forEach(function (v) { if (v != null && v < lo) lo = v; }); spec.band2.hi.forEach(function (v) { if (v != null && v > hi) hi = v; }); }
+  var hasBars = series.some(function (s) { return s.kind === 'bars'; });
+  if (!isFinite(lo)) { lo = 0; hi = 1; }
+  if (hasBars || spec.zero) lo = Math.min(lo, 0);
+  var pad = (hi - lo) * 0.05; if (!hasBars && !spec.zero) { lo -= pad; } hi += pad;
+  var nt = spec.tickFn ? spec.tickFn(spec.yMin != null ? spec.yMin : lo, spec.yMax != null ? spec.yMax : hi) : niceTicks(spec.yMin != null ? spec.yMin : lo, spec.yMax != null ? spec.yMax : hi, 5);
+  var y0 = spec.yMin != null ? spec.yMin : nt.lo, y1 = spec.yMax != null ? spec.yMax : nt.hi;
+  var ticks = nt.ticks.filter(function (t) { return t >= y0 - 1e-9 && t <= y1 + 1e-9; });
+  var lg = spec.xScale === 'log';
+  function sx(v) { return lg ? m.l + (Math.log(v) - Math.log(x0)) / (Math.log(x1) - Math.log(x0)) * iw : m.l + (v - x0) / (x1 - x0 || 1) * iw; }
+  function sy(v) { var f = (v - y0) / (y1 - y0 || 1); return spec.yReverse ? m.t + f * ih : m.t + ih - f * ih; }
+  // bands and grid
+  (spec.bands || []).forEach(function (b) { var a = sy(Math.min(Math.max(b.y0, y0), y1)), c = sy(Math.min(Math.max(b.y1, y0), y1)); S('rect', { x: m.l, y: Math.min(a, c), width: iw, height: Math.abs(c - a), style: 'fill:' + b.fill + ';opacity:' + (b.op || .12) }, svg); });
+  ticks.forEach(function (t) { S('line', { x1: m.l, x2: m.l + iw, y1: sy(t), y2: sy(t), style: 'stroke:var(--grid);stroke-width:1' }, svg); S('text', { x: m.l - 8, y: sy(t) + 4, 'text-anchor': 'end', text: (spec.yFmt || f0)(t) }, svg); });
+  S('line', { x1: m.l, x2: m.l + iw, y1: spec.yReverse ? m.t : m.t + ih, y2: spec.yReverse ? m.t : m.t + ih, style: 'stroke:var(--axis);stroke-width:1' }, svg);
+  var xt = spec.xTicks || timeTicks(x0, x1);
+  xt.forEach(function (t) { var px = sx(t.v); if (px < m.l - 1 || px > m.l + iw + 1) return; S('line', { x1: px, x2: px, y1: m.t + ih, y2: m.t + ih + 4, style: 'stroke:var(--axis)' }, svg); S('text', { x: px, y: Hh - 6, 'text-anchor': 'middle', text: t.label }, svg); });
+  if (spec.band2) {
+    var b2 = spec.band2, seg = [];
+    function flush() { if (seg.length > 1) { var d = 'M' + seg.map(function (p) { return sx(p[0]).toFixed(1) + ' ' + sy(p[2]).toFixed(1); }).join('L') + 'L' + seg.slice().reverse().map(function (p) { return sx(p[0]).toFixed(1) + ' ' + sy(p[1]).toFixed(1); }).join('L') + 'Z'; S('path', { d: d, style: 'fill:' + b2.color + ';opacity:.14' }, svg); } seg = []; }
+    b2.x.forEach(function (x, i) { if (b2.lo[i] != null && b2.hi[i] != null) seg.push([x, b2.lo[i], b2.hi[i]]); else flush(); }); flush();
+  }
+  (spec.refs || []).forEach(function (r) { if (r.y < y0 || r.y > y1) return; S('line', { x1: m.l, x2: m.l + iw, y1: sy(r.y), y2: sy(r.y), style: 'stroke:' + (r.color || 'var(--ink2)') + ';stroke-width:1;stroke-dasharray:' + (r.dash === false ? 'none' : '4 3') + ';opacity:.8' }, svg); if (r.label) S('text', { x: m.l + iw - 2, y: sy(r.y) - 4, 'text-anchor': 'end', text: r.label }, svg); });
+  function path(s, step) {
+    var d = '', pen = false, px = null, py = null;
+    for (var i = 0; i < s.x.length; i++) {
+      var v = s.y[i]; if (v == null || isNaN(v)) { pen = false; continue; }
+      var X = sx(s.x[i]).toFixed(1), Y = Math.max(m.t - 3, Math.min(m.t + ih + 3, sy(v))).toFixed(1);
+      if (!pen) d += 'M' + X + ' ' + Y; else d += step ? 'L' + X + ' ' + py + 'L' + X + ' ' + Y : 'L' + X + ' ' + Y;
+      pen = true; py = Y;
+    }
+    return d;
+  }
+  // bars
+  var barSeries = series.filter(function (s) { return s.kind === 'bars'; });
+  if (barSeries.length) {
+    var base = Math.max(y0, 0) === 0 || y0 < 0 ? 0 : y0;
+    barSeries[0].x.forEach(function (bx, i) {
+      var xe = barSeries[0].x2[i], pxA = sx(bx), pxB = sx(xe), bw = Math.min(24, Math.max(1.5, pxB - pxA - 2)), cx = (pxA + pxB) / 2, acc = 0;
+      barSeries.forEach(function (s) {
+        var v = s.y[i]; if (!v) return;
+        var from = spec.stack ? acc : 0, to = spec.stack ? acc + v : v; acc = to;
+        var yTop = sy(Math.min(to, y1)), yBot = sy(from) + (spec.stack && from > 0 ? -1 : 0), h = Math.max(1, yBot - yTop - (spec.stack ? 1 : 0));
+        S('rect', { x: (cx - bw / 2).toFixed(1), y: yTop.toFixed(1), width: bw.toFixed(1), height: h.toFixed(1), rx: Math.min(3, bw / 2, h / 2), style: 'fill:' + s.color }, svg);
+      });
+    });
+  }
+  // areas, lines, dots
+  series.forEach(function (s) {
+    if (s.kind === 'area') {
+      var segs = [], cur = [];
+      s.x.forEach(function (x, i) { if (s.y[i] == null) { if (cur.length) segs.push(cur); cur = []; } else cur.push([x, s.y[i]]); }); if (cur.length) segs.push(cur);
+      var zero = Math.min(Math.max(0, y0), y1);
+      segs.forEach(function (sg) { if (sg.length < 2) return; S('path', { d: 'M' + sg.map(function (p) { return sx(p[0]).toFixed(1) + ' ' + sy(p[1]).toFixed(1); }).join('L') + 'L' + sx(sg[sg.length - 1][0]).toFixed(1) + ' ' + sy(zero).toFixed(1) + 'L' + sx(sg[0][0]).toFixed(1) + ' ' + sy(zero).toFixed(1) + 'Z', style: 'fill:' + s.color + ';opacity:.12' }, svg); });
+    }
+  });
+  series.forEach(function (s) {
+    if (s.kind === 'line' || s.kind === 'area' || s.kind === 'step') S('path', { d: path(s, s.kind === 'step'), style: 'fill:none;stroke:' + s.color + ';stroke-width:' + (s.w || 2) + ';stroke-linejoin:round;stroke-linecap:round' + (s.dash ? ';stroke-dasharray:' + s.dash : '') + (s.op ? ';opacity:' + s.op : '') }, svg);
+  });
+  series.forEach(function (s) {
+    if (s.kind === 'dots') s.x.forEach(function (x, i) { var v = s.y[i]; if (v == null || isNaN(v)) return; S('circle', { cx: sx(x).toFixed(1), cy: sy(v).toFixed(1), r: s.r || 3, style: 'fill:' + s.color + ';opacity:' + (s.op || .55) }, svg); });
+    if (s.kind === 'line' && s.markers) s.x.forEach(function (x, i) { var v = s.y[i]; if (v == null) return; S('circle', { cx: sx(x), cy: sy(v), r: 4, style: 'fill:' + s.color + ';stroke:var(--surface);stroke-width:2' }, svg); });
+    if (s.endLabel) { for (var i = s.x.length - 1; i >= 0; i--) if (s.y[i] != null) { S('circle', { cx: sx(s.x[i]), cy: sy(s.y[i]), r: 4, style: 'fill:' + s.color + ';stroke:var(--surface);stroke-width:2' }, svg); S('text', { x: sx(s.x[i]) + 8, y: sy(s.y[i]) + 4, text: (s.fmt || spec.yFmt || f0)(s.y[i]), style: 'fill:var(--ink)' }, svg); break; } }
+  });
+  // hover
+  var tipSeries = series.filter(function (s) { return s.tip !== false; });
+  var cross = S('line', { y1: m.t, y2: m.t + ih, style: 'stroke:var(--ink2);stroke-width:1;opacity:0' }, svg);
+  var ring = S('circle', { r: 7, style: 'fill:none;stroke:var(--ink);stroke-width:2;opacity:0' }, svg);
+  var hit = S('rect', { x: m.l, y: m.t, width: iw, height: ih, style: 'fill:transparent;cursor:crosshair' }, svg);
+  var xmaps = tipSeries.map(function (s) { var mp = {}; s.x.forEach(function (x, i) { mp[x] = i; }); return mp; });
+  var snap = []; (function () { var seen = {}; series.forEach(function (s) { if (s.kind !== 'dots') s.x.forEach(function (x) { if (!seen[x]) { seen[x] = 1; snap.push(x); } }); }); snap.sort(function (a, b) { return a - b; }); })();
+  function xHead(x) { return spec.xHead ? spec.xHead(x) : dlabel(x); }
+  hit.addEventListener('pointermove', function (ev) {
+    var r = svg.getBoundingClientRect(), k = W / r.width, px = (ev.clientX - r.left) * k, py = (ev.clientY - r.top) * k;
+    if (spec.hover === 'point' || !snap.length) {
+      var best = null, bd = 30 * 30;
+      tipSeries.forEach(function (s) { s.x.forEach(function (x, i) { var v = s.y[i]; if (v == null) return; var dx = sx(x) - px, dy = sy(v) - py, d2 = dx * dx + dy * dy; if (d2 < bd) { bd = d2; best = { s: s, i: i }; } }); });
+      if (!best) { hideTip(); ring.style.opacity = 0; return; }
+      var s2 = best.s, vx = s2.x[best.i];
+      ring.setAttribute('cx', sx(vx)); ring.setAttribute('cy', sy(s2.y[best.i])); ring.style.opacity = 1;
+      showTip(ev.clientX, ev.clientY, xHead(vx), [{ color: s2.color, shape: 'dot', name: s2.name, value: (s2.fmt || spec.yFmt || f1)(s2.y[best.i]) }], s2.extra ? s2.extra(best.i) : null);
+      return;
+    }
+    var xv; if (lg) xv = Math.exp(Math.log(x0) + (px - m.l) / iw * (Math.log(x1) - Math.log(x0))); else xv = x0 + (px - m.l) / iw * (x1 - x0);
+    var a = 0, b = snap.length - 1; while (b - a > 1) { var mid = (a + b) >> 1; if (snap[mid] < xv) a = mid; else b = mid; }
+    var near = Math.abs(snap[a] - xv) <= Math.abs(snap[b] - xv) ? snap[a] : snap[b];
+    cross.setAttribute('x1', sx(near)); cross.setAttribute('x2', sx(near)); cross.style.opacity = .6;
+    var rows = []; tipSeries.forEach(function (s, si) { var i = xmaps[si][near]; if (i == null || s.y[i] == null) return; rows.push({ color: s.color, shape: s.kind === 'bars' ? 'box' : s.kind === 'dots' ? 'dot' : 'line', name: s.name, value: (s.fmt || spec.yFmt || f1)(s.y[i]) }); });
+    if (spec.stack && rows.length > 1) { var tot = 0; tipSeries.forEach(function (s, si) { var i = xmaps[si][near]; if (i != null && s.kind === 'bars') tot += s.y[i] || 0; }); rows.push({ name: 'Total', value: (spec.yFmt || f1)(tot) }); }
+    if (!rows.length) { hideTip(); return; }
+    showTip(ev.clientX, ev.clientY, xHead(near), rows, null);
+  });
+  hit.addEventListener('pointerleave', function () { hideTip(); cross.style.opacity = 0; ring.style.opacity = 0; });
+  return series;
+}
+function legendFor(spec) {
+  var items = spec.series.filter(function (s) { return s.legend !== false && s.name; });
+  if (items.length < 2 && !spec.forceLegend) return null;
+  var box = H('div', { class: 'legend' });
+  items.forEach(function (s) { var k = H('i', { class: s.kind === 'bars' ? 'k-box' : s.kind === 'dots' ? 'k-dot' : 'k-line' }); k.style.background = s.color; box.appendChild(H('span', null, [k, s.name])); });
+  if (spec.band2 && spec.band2.name) { var kb = H('i', { class: 'k-box' }); kb.style.background = spec.band2.color; kb.style.opacity = .35; box.appendChild(H('span', null, [kb, spec.band2.name])); }
+  return box;
+}
+function tableFor(spec) {
+  var cols = spec.series.filter(function (s) { return s.name && s.tip !== false; }), rows = {};
+  cols.forEach(function (s, ci) { s.x.forEach(function (x, i) { if (s.y[i] == null) return; (rows[x] = rows[x] || {})[ci] = (s.fmt || spec.yFmt || f1)(s.y[i]); }); });
+  var xs = Object.keys(rows).map(Number).sort(function (a, b) { return b - a; });
+  var shown = xs.slice(0, 80), t = H('table'), thead = H('tr', null, [H('th', { text: spec.xName || 'Date' })]);
+  cols.forEach(function (s) { thead.appendChild(H('th', { class: 'n', text: s.name })); }); t.appendChild(H('thead', null, [thead]));
+  var tb = H('tbody'); shown.forEach(function (x) { var tr = H('tr', null, [H('td', { text: spec.xHead ? spec.xHead(x) : dstr(x) })]); cols.forEach(function (_, ci) { tr.appendChild(H('td', { class: 'n', text: rows[x][ci] != null ? rows[x][ci] : '' })); }); tb.appendChild(tr); });
+  t.appendChild(tb);
+  return H('div', null, [H('div', { class: 'tscroll' }, [t]), xs.length > 80 ? H('p', { class: 'sub', text: 'Showing the most recent 80 of ' + xs.length + ' rows.' }) : null]);
+}
+function chartCard(parent, o) {
+  var card = H('div', { class: 'card' }), head = H('h2', { text: o.title }); card.appendChild(head);
+  if (o.sub) card.appendChild(H('p', { class: 'sub', text: o.sub }));
+  var spec = o.spec(); spec.title = o.title;
+  var hasData = spec.series.some(function (s) { return s.x && s.x.length && s.y.some(function (v) { return v != null && !isNaN(v); }); });
+  var lg = hasData ? legendFor(spec) : null; if (lg) card.appendChild(lg);
+  var host = H('div', { class: 'chart' }); card.appendChild(host); parent.appendChild(card);
+  if (!hasData) { host.appendChild(H('div', { class: 'empty', text: o.empty || 'No data in this range.' })); return card; }
+  timeChart(host, spec);
+  var det = H('details', { class: 'tbl' }, [H('summary', { text: 'View as table' })]), filled = false;
+  det.addEventListener('toggle', function () { if (det.open && !filled) { filled = true; det.appendChild(tableFor(spec)); } });
+  card.appendChild(det);
+  return card;
+}
+function row(cls) { var r = H('div', { class: 'row ' + (cls || '') }); app.appendChild(r); return r; }
+function tile(l, v, unit, d, kind) { return H('div', { class: 'tile' }, [H('div', { class: 'l', text: l }), H('div', { class: 'v' }, [v, unit ? H('small', { text: unit }) : null]), d ? H('div', { class: 'd ' + (kind || ''), text: d }) : null]); }
+function deltaTxt(cur, prev, goodUp, digits) {
+  if (cur == null || prev == null || prev === 0) return { t: 'no prior period', k: '' };
+  var p = (cur - prev) / Math.abs(prev), up = p > 0.005, dn_ = p < -0.005, arrow = up ? '▲ ' : dn_ ? '▼ ' : '';
+  var k = goodUp == null || (!up && !dn_) ? '' : ((up && goodUp) || (dn_ && !goodUp)) ? 'good' : 'bad';
+  return { t: arrow + sgn(p * 100, 0) + '% vs prior period', k: k };
+}
+function table(cols, rows, o) {
+  var t = H('table'), tr = H('tr'); cols.forEach(function (c) { tr.appendChild(H('th', { class: c.n ? 'n' : '', text: c.h })); }); t.appendChild(H('thead', null, [tr]));
+  var tb = H('tbody'); rows.forEach(function (r) { var trr = H('tr', r._base ? { class: 'base' } : null); cols.forEach(function (c) { var v = c.f ? c.f(r) : r[c.k]; trr.appendChild(H('td', { class: (c.n ? 'n ' : '') + (c.wrap ? 'wrap-ok' : ''), text: v == null ? '–' : String(v) })); }); tb.appendChild(trr); });
+  t.appendChild(tb); return H('div', { class: 'tbl-wrap' }, [t]);
+}
+function plainCard(title, sub, content) { var c = H('div', { class: 'card' }, [H('h2', { text: title })]); if (sub) c.appendChild(H('p', { class: 'sub', text: sub })); content.forEach(function (x) { if (x) c.appendChild(x); }); return c; }
+
+/* ---------- pieces shared by tabs ---------- */
+function rangeIdx() { return [idx(st.from), idx(st.to)]; }
+function dailySeries(col, i0, i1) { return { x: slice(DAY, i0, i1), y: slice(D[col], i0, i1) }; }
+function xdom() { return [Math.max(st.from, DAY0), Math.min(st.to, DAYN)]; }
+function sportLabel() { return st.sport === 'All' ? 'all sports' : st.sport.toLowerCase(); }
+
+/* ---------- tab: overview ---------- */
+function secHead(t, sub) { var d = H('div', { class: 'sechead' }, [H('h2', { class: 'sec', text: t })]); if (sub) d.appendChild(H('p', { text: sub })); app.appendChild(d); }
+function spark(vals, label) {
+  var w = 380, h = 100, p = 6, pts = [], lo = Infinity, hi = -Infinity;
+  vals.forEach(function (v, i) { if (v != null && !isNaN(v)) { pts.push([i, v]); if (v < lo) lo = v; if (v > hi) hi = v; } });
+  var svg = S('svg', { viewBox: '0 0 ' + w + ' ' + h, role: 'img', 'aria-label': label });
+  if (pts.length < 2) return svg;
+  var n = vals.length - 1 || 1, rg = hi - lo || 1;
+  function X(i) { return p + i / n * (w - 2 * p - 8); } function Y(v) { return h - p - (v - lo) / rg * (h - 2 * p - 6); }
+  var d = pts.map(function (q, k) { return (k ? 'L' : 'M') + X(q[0]).toFixed(1) + ' ' + Y(q[1]).toFixed(1); }).join(''), last = pts[pts.length - 1];
+  S('path', { d: d + 'L' + X(last[0]).toFixed(1) + ' ' + (h - p) + 'L' + X(pts[0][0]).toFixed(1) + ' ' + (h - p) + 'Z', style: 'fill:var(--s1);opacity:.1' }, svg);
+  S('path', { d: d, style: 'fill:none;stroke:var(--s1);stroke-width:2;stroke-linejoin:round;stroke-linecap:round' }, svg);
+  S('circle', { cx: X(last[0]).toFixed(1), cy: Y(last[1]).toFixed(1), r: 4.5, style: 'fill:var(--s1);stroke:var(--surface);stroke-width:2' }, svg);
+  return svg;
+}
+function nowStats() {
+  var last = N - 1, all = fit('All'), tsb = all.tsb[last], ctl = all.ctl[last], ratio = ctl > 0 ? tsb / ctl : 0, rows = [];
+  rows.push(['Form', sgn(tsb, 1) + ' TSB', ratio >= 0.1 ? ['good', 'Fresh'] : ratio >= -0.3 ? ['neutral', 'Productive'] : ['crit', 'Deep fatigue'], 'Fitness minus fatigue as of yesterday. From 10% of CTL above zero to 30% below is the usual training zone.']);
+  var ai = last; while (ai > 0 && all.acwr[ai] == null) ai--; var ac = all.acwr[ai];
+  rows.push(['Load ratio, 7d vs 28d', ac == null ? '–' : f2(ac), ac == null ? ['neutral', 'n/a'] : ac < 0.8 ? ['warn', 'Low'] : ac <= 1.3 ? ['good', 'Steady'] : ac <= 1.5 ? ['serious', 'Rising fast'] : ['crit', 'Spike'], '0.8 to 1.3 is steady. Above 1.5 means a large jump in one week.']);
+  var rh = D.rhr7[last], rb = D.rhr_base[last];
+  rows.push(['Resting HR, 7 day', rh == null ? '–' : f1(rh) + ' bpm', rh == null || rb == null ? ['neutral', 'n/a'] : rh - rb >= 3 ? ['serious', 'Elevated'] : rh - rb <= -3 ? ['good', 'Low'] : ['good', 'Normal'], rb == null ? '' : 'Your 60 day median is ' + f1(rb) + ' bpm. Three or more above it can mean fatigue or illness.']);
+  var hv = D.hrv7[last], lo = null, hi = null, hj = last; while (hj > last - 14 && D.hrv_lo[hj] == null) hj--; lo = D.hrv_lo[hj]; hi = D.hrv_hi[hj];
+  rows.push(['HRV, 7 day', hv == null ? '–' : f0(hv) + ' ms', hv == null || lo == null ? ['neutral', 'n/a'] : hv < lo ? ['serious', 'Below range'] : hv > hi ? ['warn', 'Above range'] : ['good', 'In range'], lo == null ? '' : 'Garmin balanced range is ' + f0(lo) + ' to ' + f0(hi) + ' ms.']);
+  var sl = D.sleep7[last];
+  rows.push(['Sleep, 7 day', sl == null ? '–' : f1(sl) + ' h', sl == null ? ['neutral', 'n/a'] : sl < 6.5 ? ['serious', 'Short'] : sl < 7.25 ? ['warn', 'Borderline'] : ['good', 'Good'], 'Average sleep time over the last week with data.']);
+  var g = H('div', { class: 'stat-grid' });
+  rows.forEach(function (x) { g.appendChild(H('div', { class: 'stat' }, [H('div', { class: 'a', text: x[0] }), H('div', { class: 'b', text: x[1] }), H('span', { class: 'pill ' + x[2][0] }, [H('i'), x[2][1]]), H('p', { class: 'c', text: x[3] })])); });
+  return g;
+}
+function heroBlock() {
+  var all = fit('All'), last = N - 1, tsb = all.tsb[last], ctl = all.ctl[last], atl = all.atl[last], ratio = ctl > 0 ? tsb / ctl : 0;
+  var dctl = ctl - all.ctl[Math.max(0, last - 28)], state = ratio >= 0.1 ? 0 : ratio >= -0.3 ? 1 : 2;
+  var title = ['You are rested.', 'You are in a building phase.', 'You are carrying heavy fatigue.'][state];
+  var txt = ['Fatigue sits below fitness, which usually means you are fresh.', 'Fatigue is a little above fitness, the normal state while training builds.', 'Fatigue is well above fitness. Easier days usually bring it back down.'][state];
+  var ai = last; while (ai > 0 && all.acwr[ai] == null) ai--; var ac = all.acwr[ai];
+  var l2 = 'Fitness is ' + (Math.abs(dctl) < 0.5 ? 'flat' : (dctl > 0 ? 'up ' : 'down ') + f0(Math.abs(dctl)) + ' points') + ' over the last four weeks' + (ac != null ? ', and the last seven days of load ran ' + f2(ac) + ' times your four week norm.' : '.');
+  var from = Math.max(0, last - 179), sp = H('div', { class: 'spark' }); sp.appendChild(spark(all.ctl.slice(from, last + 1), 'Fitness over the last 180 days'));
+  function mini(v, l) { return H('div', null, [H('b', { text: v }), H('span', { text: l })]); }
+  return H('section', { class: 'hero', 'aria-label': 'Current status' }, [
+    H('div', null, [H('div', { class: 'eyebrow', text: 'As of ' + dlabel(DAYN) }), H('h2', { text: title }), H('p', { text: txt }), H('p', { text: l2 }),
+      H('div', { class: 'hero-stats' }, [mini(sgn(tsb, 1), 'Form (TSB)'), mini(f0(atl), 'Fatigue (ATL)'), mini(D.rhr7[last] == null ? '–' : f0(D.rhr7[last]), 'Resting HR, bpm')])]),
+    H('div', { class: 'hero-r' }, [H('div', { class: 'eyebrow', text: 'Fitness (CTL)' }), H('div', { class: 'big', text: f0(ctl) }), H('div', { class: 'cap', text: (Math.abs(dctl) < 0.5 ? 'unchanged' : (dctl > 0 ? '▲ ' : '▼ ') + f0(Math.abs(dctl)) + ' points') + ' vs 4 weeks ago. Last 180 days:' }), sp])]);
+}
+function tabOverview() {
+  var f = fit(st.sport), i0 = idx(st.from), i1 = idx(st.to), span = st.to - st.from + 1;
+  var cur = actsIn(st.from, st.to, st.sport), prev = actsIn(st.from - span, st.from - 1, st.sport), noPrior = st.from <= DAY0;
+  app.appendChild(heroBlock());
+  secHead('Right now', 'Not affected by the date range or sport filter.');
+  app.appendChild(nowStats());
+  secHead('Selected range', dlabel(Math.max(st.from, DAY0)) + ' to ' + dlabel(Math.min(st.to, DAYN)) + ', ' + sportLabel() + '.');
+  function tot(a) { return { n: a.length, h: sum(a.map(function (x) { return x.dur_min; })) / 60, mi: sum(a.map(function (x) { return mi(x.dist_km); })), ft: sum(a.map(function (x) { return ft(x.elev); })), ld: sum(a.map(function (x) { return x.load; })) }; }
+  var c = tot(cur), p = tot(prev), tiles = H('div', { class: 'tiles' });
+  function add(l, v, u, cv, pv) { var d = deltaTxt(cv, pv, null); tiles.appendChild(tile(l, v, u, noPrior ? 'whole history' : d.t, '')); }
+  add('Sessions', f0(c.n), '', c.n, p.n); add('Active time', f0(c.h), 'h', c.h, p.h); add('Distance', f0(c.mi), 'mi', c.mi, p.mi); add('Climbing', f0(c.ft), 'ft', c.ft, p.ft); add('Training load', f0(c.ld), 'TRIMP', c.ld, p.ld);
+  var ctlNow = f.ctl[i1], ctlThen = i0 > 0 ? f.ctl[i0 - 1] : null, dc = deltaTxt(ctlNow, ctlThen, true);
+  tiles.appendChild(tile('Fitness (CTL)', f1(ctlNow), '', noPrior ? 'at end of range' : dc.t, noPrior ? '' : dc.k));
+  app.appendChild(tiles);
+  var w = H('div', { class: 'tiles' });
+  function wt(l, col, u, goodUp, d) { var a = mean(slice(D[col], i0, i1)), b = i0 > 0 ? mean(slice(D[col], Math.max(0, i0 - span), i0 - 1)) : null; var dd = deltaTxt(a, b, goodUp); w.appendChild(tile(l, a == null ? '–' : (d ? f1(a) : f0(a)), u, i0 === 0 ? 'average over range' : dd.t, i0 === 0 ? '' : dd.k)); }
+  wt('Resting heart rate', 'rhr', 'bpm', false, 1); wt('HRV (overnight)', 'hrv', 'ms', true, 0); wt('Sleep', 'sleep_h', 'h', true, 1); wt('Stress (daily avg)', 'stress', '', false, 0); wt('Body Battery high', 'bb_max', '', true, 0);
+  app.appendChild(w);
+  // volume chart
+  var bs = buckets(Math.max(st.from, DAY0), Math.min(st.to, DAYN)), nb = bs.length;
+  var vol = {}; SPORTS.forEach(function (s) { vol[s] = new Array(nb).fill(0); });
+  cur.forEach(function (a) { var b = bIndex(bs, a.dn); if (b >= 0) vol[a.sp][b] += a.dur_min / 60; });
+  var weekly = (st.to - st.from + 1) <= 420;
+  var wrap = H('div'); app.appendChild(wrap);
+  chartCard(wrap, { title: (weekly ? 'Weekly' : 'Monthly') + ' training hours', sub: 'Stacked by sport. ' + (st.sport === 'All' ? '' : 'Showing ' + st.sport + ' only. '), spec: function () { var x0_ = xdom(); return { h: 260, x0: bs[0].s, x1: bs[nb - 1].e, stack: true, yFmt: function (v) { return f0(v) + 'h'; }, xHead: function (x) { var b = bIndex(bs, x); return weekly ? 'Week of ' + dlabel(x) : MON[new Date(x * 864e5).getUTCMonth()] + ' ' + new Date(x * 864e5).getUTCFullYear(); }, series: SPORTS.filter(function (s) { return st.sport === 'All' || st.sport === s; }).map(function (s) { return { name: s, kind: 'bars', color: SPC[s], x: bs.map(function (b) { return b.s; }), x2: bs.map(function (b) { return b.e; }), y: vol[s].map(function (v) { return +v.toFixed(2); }), fmt: function (v) { return f1(v) + ' h'; } }; }) }; } });
+  // heatmap
+  var mm = {}, years = {}; A.forEach(function (a) { if (st.sport !== 'All' && a.sp !== st.sport) return; var y = a.date.slice(0, 4), mo = +a.date.slice(5, 7) - 1; years[y] = 1; mm[y + '-' + mo] = (mm[y + '-' + mo] || 0) + a.dur_min / 60; });
+  var yrs = Object.keys(years).sort(), mx = 0; Object.keys(mm).forEach(function (k) { if (mm[k] > mx) mx = mm[k]; });
+  var heat = H('div', { class: 'heat' }); heat.appendChild(H('div')); MON.forEach(function (m_) { heat.appendChild(H('div', { class: 'hd', text: m_.slice(0, 1) })); });
+  yrs.forEach(function (y) {
+    heat.appendChild(H('div', { text: y }));
+    for (var mo = 0; mo < 12; mo++) {
+      var v = mm[y + '-' + mo] || 0, cell = H('div', { class: 'cell', tabindex: '-1' });
+      var inData = (+y > +D.dates[0].slice(0, 4) || mo >= +D.dates[0].slice(5, 7) - 1) && (+y < +D.dates[N - 1].slice(0, 4) || mo <= +D.dates[N - 1].slice(5, 7) - 1);
+      if (!inData) cell.style.opacity = .25;
+      else if (v > 0) { var q = Math.min(6, Math.max(1, Math.ceil(Math.sqrt(v / mx) * 6))); cell.style.background = 'var(--h' + q + ')'; }
+      (function (y_, mo_, v_) { cell.addEventListener('pointermove', function (ev) { showTip(ev.clientX, ev.clientY, MON[mo_] + ' ' + y_, [{ name: 'Active time', value: f1(v_) + ' h' }]); }); cell.addEventListener('pointerleave', hideTip); })(y, mo, v);
+      heat.appendChild(cell);
+    }
+  });
+  var ramp = H('div', { class: 'ramp' }, [H('span', { text: '0' })]); for (var q = 1; q <= 6; q++) { var sw = H('i'); sw.style.background = 'var(--h' + q + ')'; ramp.appendChild(sw); } ramp.appendChild(H('span', { text: f0(mx) + ' h in a month' }));
+  var rw2 = row('wide'); rw2.appendChild(plainCard('Consistency across your whole history', 'Hours per month, ' + (st.sport === 'All' ? 'all sports' : st.sport) + '. Square root scale so quiet months stay visible. Hover a cell for the value.', [heat, ramp]));
+}
+
+/* ---------- tab: fitness ---------- */
+function tabFitness() {
+  var f = fit(st.sport), i0 = idx(st.from), i1 = idx(st.to), X = xdom(), x = slice(DAY, i0, i1);
+  app.appendChild(H('p', { class: 'note', text: 'Training load is Banister TRIMP from your heart rate, second by second. Fitness (CTL) is a 42 day exponential average of load, fatigue (ATL) a 7 day one, and form (TSB) is fitness minus fatigue as of yesterday. Currently showing ' + sportLabel() + '. The first six weeks of history are a warm-up while the averages settle.' }));
+  var wrap = H('div'); wrap.style.cssText = 'display:flex;flex-direction:column;gap:14px'; app.appendChild(wrap);
+  chartCard(wrap, { title: 'Fitness and fatigue', sub: 'CTL rises slowly with consistent training and falls slowly when you stop. ATL jumps with every hard week.', spec: function () { return { h: 280, x0: X[0], x1: X[1], zero: true, endLabel: true, yFmt: f0, series: [{ name: 'Fitness (CTL)', kind: 'line', color: 'var(--s1)', x: x, y: slice(f.ctl, i0, i1).map(function (v) { return +v.toFixed(2); }), endLabel: true, fmt: f1 }, { name: 'Fatigue (ATL)', kind: 'line', color: 'var(--s2)', x: x, y: slice(f.atl, i0, i1).map(function (v) { return +v.toFixed(2); }), fmt: f1, w: 1.5 }] }; } });
+  chartCard(wrap, { title: 'Form (TSB)', sub: 'Above zero you are fresher than your fitness suggests. Well below zero for weeks is how overreaching starts.', spec: function () { return { h: 220, x0: X[0], x1: X[1], endLabel: true, refs: [{ y: 0, dash: false, color: 'var(--axis)' }], refsInDomain: true, yFmt: f0, series: [{ name: 'Form (TSB)', kind: 'area', color: 'var(--s3)', x: x, y: slice(f.tsb, i0, i1).map(function (v) { return +v.toFixed(2); }), endLabel: true, fmt: f1 }] }; } });
+  chartCard(wrap, { title: 'Acute to chronic load ratio', sub: 'Seven day load divided by the 28 day weekly average. The shaded band is the 0.8 to 1.3 steady zone. Above 1.5 marks a spike. Hidden when your 28 day base is under 30 TRIMP a week, because the ratio swings wildly after a long break.', spec: function () { return { h: 220, x0: X[0], x1: X[1], yMin: 0, yMax: 3, endLabel: true, bands: [{ y0: .8, y1: 1.3, fill: 'var(--good)', op: .14 }], refs: [{ y: 1.5, label: '1.5 spike', color: 'var(--crit)' }], yFmt: function (v) { return v.toFixed(1); }, series: [{ name: 'Load ratio', kind: 'line', color: 'var(--s1)', x: x, y: slice(f.acwr, i0, i1).map(function (v) { return v == null ? null : +Math.min(v, 3).toFixed(3); }), endLabel: true, fmt: f2, w: 1.5 }] }; } });
+  chartCard(wrap, { title: 'Ramp rate', sub: 'Change in fitness over the last seven days. Sustained values above about +5 per week are a fast build.', spec: function () { return { h: 200, x0: X[0], x1: X[1], refs: [{ y: 0, dash: false, color: 'var(--axis)' }], refsInDomain: true, yFmt: f0, series: [{ name: 'CTL change per week', kind: 'line', color: 'var(--s1)', x: x, y: slice(f.ramp, i0, i1).map(function (v) { return v == null ? null : +v.toFixed(2); }), fmt: function (v) { return sgn(v, 1); }, w: 1.5 }] }; } });
+}
+
+/* ---------- tab: performance ---------- */
+var BEST = '5000';
+function tabPerformance() {
+  app.appendChild(H('p', { class: 'note', text: 'Running measures use runs only, with hilly efforts filtered out where noted. They are built from your own best efforts in normal training, so they are a lower bound on what you could do in a race. Garmin’s VO2max is not available through the Personal API, so the performance index below stands in for it.' }));
+  var X = xdom();
+  var runs = A.filter(function (a) { return a.group === 'Run' && a.dn >= st.from && a.dn <= st.to; });
+  var wrap = H('div'); wrap.style.cssText = 'display:flex;flex-direction:column;gap:14px'; app.appendChild(wrap);
+  var vr = runs.filter(function (a) { return a.vdot != null; });
+  var vlo = vr.length ? Math.floor(pctl(vr.map(function (a) { return a.vdot; }), 0.03) / 5) * 5 : 0; vr = vr.filter(function (a) { return a.vdot >= vlo; });
+  chartCard(wrap, { title: 'Running performance index (VDOT)', sub: 'Jack Daniels’ VDOT estimated from your best efforts of 1.9 miles or longer and 20 minute or longer windows on flat-ish runs. Dots are single runs. The line is the best of the last 90 days.', spec: function () {
+    var i0 = idx(st.from), i1 = idx(st.to); return { h: 280, x0: X[0], x1: X[1], hover: 'point', yFmt: f0, yMin: vlo, series: [
+      { name: 'Run', kind: 'dots', color: 'var(--s1)', op: .35, x: vr.map(function (a) { return a.dn; }), y: vr.map(function (a) { return a.vdot; }), fmt: f1, extra: function (i) { return basisLbl(vr[i].vdot_basis) + ' effort, ' + f1(mi(vr[i].dist_km)) + ' mi run'; } },
+      { name: '90 day best', kind: 'line', color: 'var(--s2)', x: slice(DAY, i0, i1), y: slice(D.vdot90, i0, i1), fmt: f1, tip: true }] }; } });
+  var efr = runs.filter(function (a) { return a.ef != null && a.ef_basis === 'm/min per bpm' && (a.grade == null || a.grade <= 30); });
+  var elo = efr.length ? Math.floor(pctl(efr.map(function (a) { return a.ef; }), 0.01) * 10) / 10 : 0, ehi = efr.length ? Math.ceil(pctl(efr.map(function (a) { return a.ef; }), 0.99) * 10) / 10 : 1;
+  efr = efr.filter(function (a) { return a.ef >= elo && a.ef <= ehi; });
+  var exs = efr.map(function (a) { return a.dn; }), eys = efr.map(function (a) { return a.ef; });
+  chartCard(wrap, { title: 'Aerobic efficiency', sub: 'Feet per minute for each heartbeat per minute, measured after a 10 minute warm-up on runs of 25 minutes or more. Higher means more speed at the same effort.', spec: function () { return { h: 260, x0: X[0], x1: X[1], hover: 'point', yFmt: f2, yMin: elo, yMax: ehi, series: [
+    { name: 'Run', kind: 'dots', color: 'var(--s1)', op: .35, x: exs, y: eys, fmt: f2, extra: function (i) { return f1(mi(efr[i].dist_km)) + ' mi at ' + f0(efr[i].avg_hr) + ' bpm'; } },
+    { name: '90 day median', kind: 'line', color: 'var(--s2)', x: exs, y: rollMedianPts(exs, eys, 45, 5), fmt: f2 }] }; } });
+  var dr = runs.filter(function (a) { return a.dec != null && a.grade != null && a.grade <= 15 && a.steady_s >= 1500; });
+  var dxs = dr.map(function (a) { return a.dn; }), dys = dr.map(function (a) { return Math.max(-15, Math.min(30, a.dec)); });
+  chartCard(wrap, { title: 'Aerobic decoupling', sub: 'How much pace per heartbeat fades from the first half to the second half of a steady run. Under 5 percent is a well-built aerobic base. Only flat runs (under 80 ft of climb per mile) are shown, clipped to a range of −15 to 30.', empty: 'No flat runs of 35 minutes or more in this range.', spec: function () { return { h: 260, x0: X[0], x1: X[1], hover: 'point', yMin: -15, yMax: 30, bands: [{ y0: -15, y1: 5, fill: 'var(--good)', op: .1 }], refs: [{ y: 5, label: '5%', color: 'var(--ink2)' }, { y: 0, dash: false, color: 'var(--axis)' }], yFmt: function (v) { return v + '%'; }, series: [
+    { name: 'Run', kind: 'dots', color: 'var(--s1)', op: .4, x: dxs, y: dys, fmt: function (v) { return f1(v) + '%'; }, extra: function (i) { return f1(mi(dr[i].dist_km)) + ' mi, ' + f0(dr[i].steady_s / 60) + ' min steady'; } },
+    { name: '90 day median', kind: 'line', color: 'var(--s2)', x: dxs, y: rollMedianPts(dxs, dys, 45, 5), fmt: function (v) { return f1(v) + '%'; } }] }; } });
+  var zr = runs.filter(function (a) { return a.z2 && (a.grade == null || a.grade <= 30); });
+  var zlo = zr.length ? Math.floor(pctl(zr.map(function (a) { return 1609.344 / a.z2; }), 0.02) / 30) * 30 : 0, zhi = zr.length ? Math.ceil(pctl(zr.map(function (a) { return 1609.344 / a.z2; }), 0.98) / 30) * 30 : 1;
+  zr = zr.filter(function (a) { var v = 1609.344 / a.z2; return v >= zlo && v <= zhi; });
+  var zxs = zr.map(function (a) { return a.dn; }), zys = zr.map(function (a) { return 1609.344 / a.z2; });
+  chartCard(wrap, { title: 'Pace at easy heart rate', sub: 'Average pace while your heart rate sat in zone 2 (118 to 137 bpm), per run. Faster pace at the same heart rate means fitness is improving. Faster is higher on this chart.', spec: function () { return { h: 260, x0: X[0], x1: X[1], hover: 'point', yReverse: true, yFmt: ptime, tickFn: secTicks, yMin: zlo, yMax: zhi, series: [
+    { name: 'Run', kind: 'dots', color: 'var(--s1)', op: .35, x: zxs, y: zys, fmt: function (v) { return ptime(v) + ' /mi'; }, extra: function (i) { return f1(mi(zr[i].dist_km)) + ' mi run'; } },
+    { name: '90 day median', kind: 'line', color: 'var(--s2)', x: zxs, y: rollMedianPts(zxs, zys, 45, 5), fmt: function (v) { return ptime(v) + ' /mi'; } }] }; } });
+  // best efforts
+  var DS = [['1609.344', '1 mi'], ['5000', '3.1 mi'], ['10000', '6.2 mi'], ['21097.5', '13.1 mi']];
+  var bc = H('div', { class: 'card' }); wrap.appendChild(bc);
+  function drawBest() {
+    bc.textContent = ''; bc.appendChild(H('h2', { text: 'Best efforts over time' }));
+    bc.appendChild(H('p', { class: 'sub', text: 'Fastest time for the distance inside each run, on timer time with pauses removed. The line steps down each time you set a new best. Faster is higher. The slowest 10 percent of efforts are hidden so the fast end stays readable.' }));
+    var seg = H('div', { class: 'seg', role: 'group', 'aria-label': 'Distance' }); seg.style.marginBottom = '8px'; seg.style.width = 'max-content';
+    DS.forEach(function (d) { var b = H('button', { type: 'button', text: d[1], 'aria-pressed': String(BEST === d[0]) }); b.addEventListener('click', function () { BEST = d[0]; drawBest(); }); seg.appendChild(b); }); bc.appendChild(seg);
+    var pts = DATA.progression[BEST] || [], inR0 = pts.filter(function (p) { return dn(p[0]) >= st.from && dn(p[0]) <= st.to; });
+    var bmin = inR0.length ? Math.min.apply(null, inR0.map(function (p) { return p[1]; })) : 0, bhi = inR0.length ? pctl(inR0.map(function (p) { return p[1]; }), 0.9) * 1.04 : 1, inR = inR0.filter(function (p) { return p[1] <= bhi; });
+    var host = H('div', { class: 'chart' }); bc.appendChild(host);
+    if (!inR.length) { host.appendChild(H('div', { class: 'empty', text: 'No efforts at this distance in the selected range.' })); return; }
+    var best = Infinity, sx_ = [], sy_ = []; pts.forEach(function (p) { var x = dn(p[0]); if (p[1] < best) best = p[1]; if (x >= st.from && x <= st.to) { sx_.push(x); sy_.push(best); } });
+    var spec = { h: 280, x0: X[0], x1: X[1], hover: 'point', yReverse: true, yFmt: ptime, yFmtWide: true, tickFn: secTicks, yMin: Math.floor(bmin * 0.97 / 10) * 10, yMax: bhi, series: [
+      { name: 'Run', kind: 'dots', color: 'var(--s1)', op: .4, x: inR.map(function (p) { return dn(p[0]); }), y: inR.map(function (p) { return p[1]; }), fmt: ptime },
+      { name: 'Best so far', kind: 'step', color: 'var(--s2)', x: sx_, y: sy_, fmt: ptime, tip: false }], title: 'Best efforts' };
+    var lg = legendFor(spec); if (lg) bc.insertBefore(lg, host);
+    timeChart(host, spec);
+    var det = H('details', { class: 'tbl' }, [H('summary', { text: 'View as table' })]), fl = false; det.addEventListener('toggle', function () { if (det.open && !fl) { fl = true; det.appendChild(tableFor(spec)); } }); bc.appendChild(det);
+  }
+  drawBest();
+  // critical speed
+  var cs = DATA.critical_speed.filter(function (c) { return dn(c.date) >= st.from && dn(c.date) <= st.to; });
+  chartCard(wrap, { title: 'Critical speed', sub: 'The pace you could hold for a long effort, fitted to your best 3, 5, 10 and 20 minute efforts over the previous 180 days. Each point is a month end. Faster is higher. D′ is the distance you can run above that pace.', empty: 'Not enough hard efforts in this range to fit a model.', spec: function () { return { h: 240, x0: X[0], x1: X[1], yReverse: true, yFmt: ptime, tickFn: secTicks, series: [{ name: 'Critical pace', kind: 'line', markers: true, color: 'var(--s1)', x: cs.map(function (c) { return dn(c.date); }), y: cs.map(function (c) { return 1609.344 / c.cs; }), fmt: function (v) { return ptime(v) + ' /mi'; } }] }; } });
+  // power curve
+  var pw = DATA.power, pd = ['5', '60', '300', '600', '1200', '1800', '3600'], pl = { 5: '5s', 60: '1m', 300: '5m', 600: '10m', 1200: '20m', 1800: '30m', 3600: '60m' };
+  var allB = [], rngB = [], px = [];
+  pd.forEach(function (k) { var arr = pw[k] || []; if (!arr.length) return; px.push(+k); allB.push(Math.max.apply(null, arr.map(function (p) { return p[1]; }))); var r_ = arr.filter(function (p) { return dn(p[0]) >= st.from && dn(p[0]) <= st.to; }); rngB.push(r_.length ? Math.max.apply(null, r_.map(function (p) { return p[1]; })) : null); });
+  chartCard(wrap, { title: 'Cycling power curve', sub: 'Best average power for each duration, from the ' + DATA.coverage['Activities with power'] + ' rides that have a power meter or Zwift power. Only 36 rides is a small sample, so treat it as a rough profile.', empty: 'No rides with power data.', spec: function () { return { h: 240, x0: 5, x1: 3600, xScale: 'log', xTicks: pd.map(function (k) { return { v: +k, label: pl[k] }; }), hover: 'x', xHead: function (x) { return pl[x] || x + 's'; }, zero: true, yFmt: function (v) { return f0(v) + 'W'; }, series: [{ name: 'All time', kind: 'line', markers: true, color: 'var(--s2)', x: px, y: allB, fmt: function (v) { return f0(v) + ' W'; } }, { name: 'Selected range', kind: 'line', markers: true, color: 'var(--s1)', x: px, y: rngB, fmt: function (v) { return f0(v) + ' W'; } }] }; } });
+}
+
+/* ---------- tab: recovery ---------- */
+function tabRecovery() {
+  var i0 = idx(st.from), i1 = idx(st.to), X = xdom(), x = slice(DAY, i0, i1);
+  app.appendChild(H('p', { class: 'note', text: 'Recovery charts always cover every sport together. Dots are single days, lines are rolling averages. HRV starts in September 2022 and sleep data is patchy before 2023, so earlier ranges can look sparse.' }));
+  var wrap = H('div'); wrap.style.cssText = 'display:flex;flex-direction:column;gap:14px'; app.appendChild(wrap);
+  var col = function (c) { return slice(D[c], i0, i1); };
+  chartCard(wrap, { title: 'Resting heart rate', sub: 'A rising line against your 60 day median is an early sign of fatigue, illness or poor recovery.', spec: function () { return { h: 250, x0: X[0], x1: X[1], endLabel: true, yFmt: f0, series: [
+    { name: 'Daily', kind: 'dots', color: 'var(--s1)', op: .3, r: 2.2, x: x, y: col('rhr'), fmt: f0, tip: true },
+    { name: '7 day average', kind: 'line', color: 'var(--s1)', x: x, y: col('rhr7'), fmt: f1, endLabel: true },
+    { name: '60 day median', kind: 'line', color: 'var(--s2)', x: x, y: col('rhr_base'), fmt: f1, w: 1.5, dash: '5 4' }] }; } });
+  chartCard(wrap, { title: 'Heart rate variability', sub: 'Overnight average. The shaded band is Garmin’s own balanced range for you. Seven day averages below the band suggest accumulated stress.', empty: 'No HRV data in this range (it begins in September 2022).', spec: function () { return { h: 250, x0: X[0], x1: X[1], endLabel: true, yFmt: f0, band2: { x: x, lo: col('hrv_lo'), hi: col('hrv_hi'), color: 'var(--s3)', name: 'Garmin balanced range' }, series: [
+    { name: 'Nightly', kind: 'dots', color: 'var(--s1)', op: .3, r: 2.2, x: x, y: col('hrv'), fmt: f0 },
+    { name: '7 day average', kind: 'line', color: 'var(--s1)', x: x, y: col('hrv7'), fmt: f1, endLabel: true }] }; } });
+  var sl30 = roll(D.sleep_h, 30, 8).slice(i0, i1 + 1);
+  chartCard(wrap, { title: 'Sleep duration', sub: 'Time asleep per night, with a 30 day average.', empty: 'No sleep data in this range.', spec: function () { return { h: 240, x0: X[0], x1: X[1], yMin: 0, yMax: 12, endLabel: true, refs: [{ y: 8, label: '8 h', color: 'var(--ink2)' }], yFmt: function (v) { return v + 'h'; }, series: [
+    { name: 'Nightly', kind: 'dots', color: 'var(--s1)', op: .3, r: 2.2, x: x, y: col('sleep_h'), fmt: function (v) { return f1(v) + ' h'; } },
+    { name: '30 day average', kind: 'line', color: 'var(--s1)', x: x, y: sl30, fmt: function (v) { return f1(v) + ' h'; }, endLabel: true }] }; } });
+  var sc30 = roll(D.sleep_score, 30, 8).slice(i0, i1 + 1);
+  chartCard(wrap, { title: 'Sleep score', sub: 'Garmin’s nightly score from 0 to 100, 30 day average. Scores start when your device began reporting them.', empty: 'No sleep score data in this range.', spec: function () { return { h: 220, x0: X[0], x1: X[1], yMin: 40, yMax: 100, endLabel: true, yFmt: f0, series: [
+    { name: 'Nightly', kind: 'dots', color: 'var(--s3)', op: .3, r: 2.2, x: x, y: col('sleep_score'), fmt: f0 },
+    { name: '30 day average', kind: 'line', color: 'var(--s3)', x: x, y: sc30, fmt: f1, endLabel: true }] }; } });
+  chartCard(wrap, { title: 'Body Battery', sub: 'Highest and lowest daily value, 14 day averages. A high that no longer recovers close to 100 points to under-recovery.', spec: function () { return { h: 240, x0: X[0], x1: X[1], yMin: 0, yMax: 100, endLabel: true, yFmt: f0, series: [
+    { name: 'Daily high', kind: 'line', color: 'var(--s1)', x: x, y: roll(D.bb_max, 14, 5).slice(i0, i1 + 1), fmt: f0, endLabel: true },
+    { name: 'Daily low', kind: 'line', color: 'var(--s2)', x: x, y: roll(D.bb_min, 14, 5).slice(i0, i1 + 1), fmt: f0 }] }; } });
+  chartCard(wrap, { title: 'Daily stress', sub: 'Average stress level from heart rate variability, 14 day average. Lower is calmer.', spec: function () { return { h: 220, x0: X[0], x1: X[1], endLabel: true, yFmt: f0, series: [{ name: 'Stress', kind: 'line', color: 'var(--s2)', x: x, y: roll(D.stress, 14, 5).slice(i0, i1 + 1), fmt: f0, endLabel: true }] }; } });
+  var cr = INS.efficiency_correlates || [];
+  var rows = cr.map(function (c) { var sig = c.n >= 30 && c.p < 0.05 && Math.abs(c.r) >= 0.15; return { f: c.factor, r: (c.r >= 0 ? '+' : '−') + Math.abs(c.r).toFixed(2), n: c.n, p: c.p < 0.001 ? '<0.001' : c.p.toFixed(2), v: c.n < 30 ? 'Too few runs to say' : sig ? (c.r > 0 ? 'Higher goes with better efficiency' : 'Higher goes with worse efficiency') : 'No reliable relationship' }; });
+  var rw = row('wide'); rw.appendChild(plainCard('Does recovery predict how well you run?', 'Each steady run’s efficiency compared with your own runs within 45 days either side, against the state you were in that morning. ' + INS.efficiency_n_runs + ' runs. A correlation below 0.15 or a p value above 0.05 is within noise.', [table([{ h: 'Factor', k: 'f' }, { h: 'r', k: 'r', n: 1 }, { h: 'Runs', k: 'n', n: 1 }, { h: 'p', k: 'p', n: 1 }, { h: 'Reading', k: 'v' }], rows)]));
+}
+
+/* ---------- tab: sports ---------- */
+function zoneShare(acts) {
+  var z = [0, 0, 0, 0, 0, 0]; acts.forEach(function (a) { if (a.zone_s) for (var k = 0; k < 6; k++) z[k] += a.zone_s[k]; });
+  var low = z[0] + z[1] + z[2], mid = z[3], high = z[4] + z[5], t = low + mid + high; if (!t) return null;
+  var p1 = low / t * 100, p2 = Math.max(mid / t * 100, .5), p3 = Math.max(high / t * 100, .5), pi = Math.log10(p1 / (p2 * p3) * 100), cls;
+  if (p1 > p2 && p2 > p3) cls = 'Pyramidal'; else if (p1 > p3 && p3 > p2 && pi > 2) cls = 'Polarized'; else if (p1 > p3 && p3 > p2) cls = 'Polarized-leaning'; else if (p2 >= p1) cls = 'Threshold-heavy'; else cls = 'Mixed';
+  return { low: low / t, mid: mid / t, high: high / t, mins: t / 60, pi: pi, cls: cls };
+}
+function tabSports() {
+  var cur = actsIn(st.from, st.to, 'All'), span = st.to - st.from + 1;
+  var rows = SPORTS.map(function (s) { var a = cur.filter(function (x) { return x.sp === s; }); var hrs = a.filter(function (x) { return x.avg_hr; }); return { s: s, n: a.length, h: sum(a.map(function (x) { return x.dur_min; })) / 60, km: sum(a.map(function (x) { return x.dist_km; })), el: sum(a.map(function (x) { return x.elev; })), hr: hrs.length ? sum(hrs.map(function (x) { return x.avg_hr * x.dur_min; })) / sum(hrs.map(function (x) { return x.dur_min; })) : null, ld: sum(a.map(function (x) { return x.load; })) }; });
+  var totLoad = sum(rows.map(function (r) { return r.ld; })), totH = sum(rows.map(function (r) { return r.h; }));
+  var tbl = table([{ h: 'Sport', f: function (r) { return r.s; } }, { h: 'Sessions', k: 'n', n: 1 }, { h: 'Hours', n: 1, f: function (r) { return f1(r.h); } }, { h: 'Distance mi', n: 1, f: function (r) { return f0(mi(r.km)); } }, { h: 'Climbing ft', n: 1, f: function (r) { return f0(ft(r.el)); } }, { h: 'Avg HR', n: 1, f: function (r) { return r.hr ? f0(r.hr) : null; } }, { h: 'Load', n: 1, f: function (r) { return f0(r.ld); } }, { h: 'Share of load', n: 1, f: function (r) { return totLoad ? pct(r.ld / totLoad) : null; } }], rows.filter(function (r) { return r.n > 0; }));
+  var bar = H('div', { class: 'stackbar' }); rows.forEach(function (r) { if (r.h > 0) { var i = H('i'); i.style.background = SPC[r.s]; i.style.width = (r.h / totH * 100) + '%'; i.title = r.s; bar.appendChild(i); } });
+  var leg = H('div', { class: 'legend' }); rows.forEach(function (r) { if (r.h > 0) { var k = H('i', { class: 'k-box' }); k.style.background = SPC[r.s]; leg.appendChild(H('span', null, [k, r.s + ' ' + pct(r.h / totH)])); } });
+  var rw = row('wide'); rw.appendChild(plainCard('Time by sport', 'Selected date range, all sports. "Other" holds swims, kayaking, rowing, strength and anything uncategorized.', [leg, bar, H('div', { style: 'height:10px' }), tbl]));
+  // intensity distribution
+  var bs = buckets(Math.max(st.from, DAY0), Math.min(st.to, DAYN));
+  var m3 = bs.map(function () { return [0, 0, 0]; }); var sel = actsIn(st.from, st.to, st.sport);
+  var zsum = zoneShare(sel);
+  sel.forEach(function (a) { if (!a.zone_s) return; var b = bIndex(bs, a.dn); if (b < 0) return; var z = a.zone_s; m3[b][0] += z[0] + z[1] + z[2]; m3[b][1] += z[3]; m3[b][2] += z[4] + z[5]; });
+  var xs = bs.map(function (b) { return b.s; }), x2 = bs.map(function (b) { return b.e; });
+  var shares = [0, 1, 2].map(function (k) { return m3.map(function (v) { var t = v[0] + v[1] + v[2]; return t > 60 ? +(v[k] / t * 100).toFixed(1) : 0; }); });
+  var wrap = H('div'); app.appendChild(wrap);
+  var sub = zsum ? 'Share of heart rate time by zone group. Low is below zone 3, moderate is zone 3, high is zones 4 and 5. Over this range: ' + pct(zsum.low) + ' low, ' + pct(zsum.mid) + ' moderate, ' + pct(zsum.high) + ' high, a ' + zsum.cls.toLowerCase() + ' pattern (polarization index ' + zsum.pi.toFixed(2) + '; above 2.0 is polarized).' : 'No heart rate zone data in this range.';
+  chartCard(wrap, { title: 'Intensity distribution (' + sportLabel() + ')', sub: sub, spec: function () { return { h: 260, x0: bs[0].s, x1: bs[bs.length - 1].e, stack: true, yMin: 0, yMax: 100, yFmt: function (v) { return v + '%'; }, xHead: function (x) { return (span <= 420 ? 'Week of ' : '') + dlabel(x); }, series: [{ name: 'Low (zones 1 to 2)', kind: 'bars', color: 'var(--z1)', x: xs, x2: x2, y: shares[0], fmt: function (v) { return f0(v) + '%'; } }, { name: 'Moderate (zone 3)', kind: 'bars', color: 'var(--z2)', x: xs, x2: x2, y: shares[1], fmt: function (v) { return f0(v) + '%'; } }, { name: 'High (zones 4 to 5)', kind: 'bars', color: 'var(--z3)', x: xs, x2: x2, y: shares[2], fmt: function (v) { return f0(v) + '%'; } }] }; } });
+  // seasonality
+  var mh = new Array(12).fill(0), yrsSeen = {}; A.forEach(function (a) { if (st.sport !== 'All' && a.sp !== st.sport) return; mh[+a.date.slice(5, 7) - 1] += a.dur_min / 60; });
+  var firstY = +D.dates[0].slice(0, 4), lastY = +D.dates[N - 1].slice(0, 4), cnt = new Array(12).fill(0);
+  for (var y = firstY; y <= lastY; y++) for (var m_ = 0; m_ < 12; m_++) { var s0 = Date.UTC(y, m_, 1) / 864e5, e0 = Date.UTC(y, m_ + 1, 1) / 864e5; if (s0 >= DAY0 - 0 && e0 - 1 <= DAYN) cnt[m_]++; }
+  var avg = mh.map(function (v, i) { return cnt[i] ? v / cnt[i] : 0; });
+  var host = H('div'); app.appendChild(host);
+  var seas = H('div', { class: 'card' }, [H('h2', { text: 'Seasonal pattern' }), H('p', { class: 'sub', text: 'Average training hours in each calendar month across every full month on record, ' + sportLabel() + '.' })]);
+  var chost = H('div', { class: 'chart' }); seas.appendChild(chost); host.appendChild(seas);
+  var xsM = MON.map(function (_, i) { return i * 30 + 1; });
+  timeChart(chost, { h: 220, x0: 0, x1: 360, xTicks: MON.map(function (m, i) { return { v: i * 30 + 15, label: m }; }), xHead: function (x) { return MON[Math.min(11, Math.floor((x - 1) / 30))]; }, yFmt: function (v) { return f0(v) + 'h'; }, series: [{ name: 'Avg hours', kind: 'bars', color: 'var(--s1)', x: MON.map(function (_, i) { return i * 30; }), x2: MON.map(function (_, i) { return i * 30 + 30; }), y: avg.map(function (v) { return +v.toFixed(2); }), fmt: function (v) { return f1(v) + ' h'; } }], title: 'Seasonal pattern' });
+  // consistency
+  var days = {}; sel.forEach(function (a) { if (a.dur_min >= 10) days[a.dn] = 1; });
+  var cs = 0, best = 0, bestEnd = null, curRun = 0, gap = 0, maxGap = 0, gapEnd = null;
+  for (var d = Math.max(st.from, DAY0); d <= Math.min(st.to, DAYN); d++) { if (days[d]) { curRun++; gap = 0; if (curRun > best) { best = curRun; bestEnd = d; } } else { curRun = 0; gap++; if (gap > maxGap) { maxGap = gap; gapEnd = d; } } }
+  var wk = {}; Object.keys(days).forEach(function (d_) { var w = Math.floor((+d_ - ((+d_ + 3) % 7)) / 7); wk[w] = (wk[w] || 0) + 1; });
+  var w0 = Math.floor((Math.max(st.from, DAY0) - ((Math.max(st.from, DAY0) + 3) % 7)) / 7), w1 = Math.floor((Math.min(st.to, DAYN) - ((Math.min(st.to, DAYN) + 3) % 7)) / 7), nw = w1 - w0 + 1, a1 = 0, a3 = 0;
+  for (var w_ = w0; w_ <= w1; w_++) { if ((wk[w_] || 0) >= 1) a1++; if ((wk[w_] || 0) >= 3) a3++; }
+  var w3 = 0, w3b = 0; for (w_ = w0; w_ <= w1; w_++) { if ((wk[w_] || 0) >= 3) { w3++; if (w3 > w3b) w3b = w3; } else w3 = 0; }
+  var tl = H('div', { class: 'tiles' }); tl.appendChild(tile('Longest daily streak', String(best), 'days', bestEnd ? 'ending ' + dlabel(bestEnd) : '')); tl.appendChild(tile('Longest break', String(maxGap), 'days', gapEnd ? 'ending ' + dlabel(gapEnd) : '')); tl.appendChild(tile('Weeks with a session', nw ? pct(a1 / nw) : '–', '', a1 + ' of ' + nw + ' weeks')); tl.appendChild(tile('Weeks with 3+ sessions', nw ? pct(a3 / nw) : '–', '', 'best run of ' + w3b + ' weeks in a row'));
+  app.appendChild(H('h2', { class: 'sec', text: 'Consistency (' + sportLabel() + ', sessions of 10 minutes or more)' })); app.appendChild(tl);
+}
+
+/* ---------- tab: records ---------- */
+function tabRecords() {
+  app.appendChild(H('p', { class: 'note', text: 'All time, across your whole history. These do not change with the filters above.' }));
+  var rw = row(); rw.appendChild(plainCard('Personal records', null, [table([{ h: 'Record', k: 'label' }, { h: 'Result', k: 'value', n: 1 }, { h: 'Date', f: function (r) { return r.date ? dlabel(dn(r.date)) : null; } }, { h: 'Sport', k: 'sport' }], DATA.records)]));
+  var DS = [['1609.344', '1 mile'], ['5000', '3.1 miles'], ['10000', '6.2 miles'], ['21097.5', 'Half marathon (13.1 miles)']], cards = [];
+  DS.forEach(function (d) { var pts = (DATA.progression[d[0]] || []).slice().sort(function (a, b) { return a[1] - b[1]; }).slice(0, 5); if (!pts.length) return; cards.push(plainCard('Top 5, ' + d[1], null, [table([{ h: '#', f: function (r) { return r._i; } }, { h: 'Time', n: 1, f: function (r) { return ptime(r[1]); } }, { h: 'Pace /mi', n: 1, f: function (r) { return ptime(r[1] / (+d[0] / 1609.344)); } }, { h: 'Date', f: function (r) { return dlabel(dn(r[0])); } }], pts.map(function (p, i) { var q = p.slice(); q._i = i + 1; return q; }))])); });
+  var r2 = row(); cards.forEach(function (c) { r2.appendChild(c); });
+}
+
+/* ---------- tab: insights ---------- */
+function tabInsights() {
+  app.appendChild(H('p', { class: 'note', text: 'These are patterns in your own data, found by computer. They show what went together, not what caused what, and some rest on small samples. Sample sizes are shown next to every claim.' }));
+  var bb = INS.best_blocks || [], base = INS.block_baseline || {};
+  var rows = bb.map(function (b) { return { d: dlabel(dn(b.peak_date)), v: b.vdot, s: b.sessions_wk, k: b.run_km_wk, l: b.load_wk, h: b.hard_share, sl: b.sleep_h, rh: b.rhr, t: b.tsb_end, c: b.ctl_end }; });
+  rows.push({ d: 'Typical 8 week window', v: null, s: base.sessions_wk, k: base.run_km_wk, l: base.load_wk, h: base.hard_share, sl: base.sleep_h, rh: base.rhr, t: base.tsb_end, c: base.ctl_end, _base: true });
+  var ms = median(bb.map(function (b) { return b.sessions_wk; })), mk = median(bb.map(function (b) { return b.run_km_wk; })), mt = median(bb.map(function (b) { return b.tsb_end; }));
+  var txt = bb.length ? 'Across your ' + bb.length + ' best performance peaks, the eight weeks before averaged a median of ' + f1(ms) + ' sessions and ' + f0(mi(mk)) + ' running miles per week, against ' + f1(base.sessions_wk) + ' sessions and ' + f0(mi(base.run_km_wk)) + ' miles in a typical eight week window. Form on the peak day was a median ' + sgn(mt, 0) + ' TSB.' : '';
+  var rw = row('wide'); rw.appendChild(plainCard('Your best training blocks', 'Each row is the eight weeks leading into a peak of your performance index (best peak per half year, at least 120 days apart, top five). ' + txt, [table([{ h: 'Peak', k: 'd' }, { h: 'Index', n: 1, f: function (r) { return r.v ? f1(r.v) : null; } }, { h: 'Sessions/wk', n: 1, f: function (r) { return r.s != null ? f1(r.s) : null; } }, { h: 'Run mi/wk', n: 1, f: function (r) { return r.k != null ? f0(mi(r.k)) : null; } }, { h: 'Load/wk', n: 1, f: function (r) { return r.l != null ? f0(r.l) : null; } }, { h: 'Hard share', n: 1, f: function (r) { return r.h != null && !isNaN(r.h) ? pct(r.h) : null; } }, { h: 'Sleep h', n: 1, f: function (r) { return r.sl != null ? f1(r.sl) : null; } }, { h: 'Rest HR', n: 1, f: function (r) { return r.rh != null ? f0(r.rh) : null; } }, { h: 'TSB at peak', n: 1, f: function (r) { return r.t != null ? sgn(r.t, 0) : null; } }, { h: 'CTL at peak', n: 1, f: function (r) { return r.c != null ? f0(r.c) : null; } }], rows)]));
+  // PR analysis
+  var pa = INS.pr_analysis || { by_feature: {} }, names = { sessions_wk: 'Sessions per week', run_km_wk: 'Running miles per week', load_wk: 'Training load per week', hard_share: 'Share of time in zones 4 to 5', sleep_h: 'Sleep (hours)', rhr: 'Resting heart rate', hrv: 'HRV (ms)', tsb_end: 'Form (TSB)', ctl_end: 'Fitness (CTL)', acwr_end: 'Load ratio' };
+  var prRows = Object.keys(pa.by_feature).map(function (k) { var v = pa.by_feature[k], cv = k === 'run_km_wk' ? KM2MI : 1; var big = v.pr_pct_rank >= 75 ? 'Higher than usual' : v.pr_pct_rank <= 25 ? 'Lower than usual' : 'Typical'; return { f: names[k] || k, a: v.pr_median * cv, b: v.typical_median * cv, p: v.pr_pct_rank, n: v.n, r: big, d: (k === 'hard_share') ? 1 : (k === 'acwr_end' || k === 'sleep_h') ? 2 : 1 }; });
+  var rw2 = row('wide'); rw2.appendChild(plainCard('What came before your season-best efforts', pa.n_events + ' season-best efforts (faster than anything at that distance in the previous 365 days, across distances from about a mile to the half marathon). Each is compared with the 28 days before it, against 28 day windows sampled weekly across your history. The percentile shows where the before-PR median sits among all windows.', [table([{ h: 'Measure', k: 'f' }, { h: 'Before a PR', n: 1, f: function (r) { return /share/i.test(r.f) ? pct(r.a) : f1(r.a); } }, { h: 'Typical', n: 1, f: function (r) { return /share/i.test(r.f) ? pct(r.b) : f1(r.b); } }, { h: 'Percentile', n: 1, f: function (r) { return f0(r.p); } }, { h: 'n', n: 1, k: 'n' }, { h: 'Reading', k: 'r' }], prRows)]));
+  // overreaching
+  var oRows = (INS.overreaching || []).map(function (o) { return { s: dlabel(dn(o.start)), e: dlabel(dn(o.end)), d: o.days, a: o.peak_acwr, w: o.peak_week_load, r: o.rhr_change, h: o.hrv_change }; });
+  var rw3 = row('wide'); rw3.appendChild(plainCard('Load spikes', INS.overreaching_total + ' episodes where the 7 day load ran above 1.5 times the 28 day norm and was at least 80 percent of a typical week. The ten sharpest are listed. Most follow a quiet stretch, so the ratio jumps when you restart. Resting HR and HRV changes compare the week after with the two weeks before.', [table([{ h: 'From', k: 's' }, { h: 'To', k: 'e' }, { h: 'Days', k: 'd', n: 1 }, { h: 'Peak ratio', n: 1, f: function (r) { return f2(r.a); } }, { h: 'Peak week load', n: 1, f: function (r) { return f0(r.w); } }, { h: 'Rest HR after', n: 1, f: function (r) { return r.r != null ? sgn(r.r, 1) + ' bpm' : null; } }, { h: 'HRV after', n: 1, f: function (r) { return r.h != null ? sgn(r.h, 1) + ' ms' : null; } }], oRows)]));
+  // detraining
+  var dRows = (INS.detraining || []).slice().sort(function (a, b) { return b.days - a.days; }).slice(0, 10).map(function (g) { return { s: dlabel(dn(g.start)), e: dlabel(dn(g.end)), d: g.days, c0: g.ctl_before, c1: g.ctl_after, p: g.ctl_drop_pct, r: g.days_to_regain_90pct }; });
+  var rw4 = row('wide'); rw4.appendChild(plainCard('Detraining breaks', (INS.detraining || []).length + ' breaks of 14 days or longer with no session of 10 minutes or more. The ten longest are shown, with how much fitness fell and how long it took to get back to 90 percent of where you left off.', [table([{ h: 'From', k: 's' }, { h: 'To', k: 'e' }, { h: 'Days', k: 'd', n: 1 }, { h: 'CTL before', n: 1, f: function (r) { return f1(r.c0); } }, { h: 'CTL after', n: 1, f: function (r) { return f1(r.c1); } }, { h: 'Fitness lost', n: 1, f: function (r) { return r.p != null ? f0(r.p) + '%' : null; } }, { h: 'Days to regain 90%', n: 1, f: function (r) { return r.r != null ? r.r : 'not yet'; } }], dRows)]));
+}
+
+/* ---------- tab: method ---------- */
+function tabMethod() {
+  var V = DATA.validation, C = DATA.coverage, lv = V.load_vs_garmin_training_load, be = V.best_effort_vs_garmin_splits;
+  function li(t) { return H('li', { text: t }); }
+  var c1 = plainCard('What each number means', null, [H('ul', { class: 'plain' }, [
+    li('Load is Banister TRIMP: minutes x heart rate reserve fraction x 0.64 x e^(1.92 x fraction), summed second by second from the activity file. Resting HR ' + META.rest_hr + ' and max HR ' + META.max_hr + ' come from your Garmin settings and are applied to all years. The 0.64 and 1.92 constants are the standard male coefficients.'),
+    li('Fitness (CTL) and fatigue (ATL) are exponential averages of daily load with 42 and 7 day time constants, each day updated as value + (load − value) x (1 − e^(−1/time constant)). Form (TSB) is yesterday’s CTL minus yesterday’s ATL.'),
+    li('Load ratio is 7 day load divided by the 28 day load divided by four, shown only when that 28 day weekly average is at least 30 TRIMP. Ramp rate is the change in CTL over seven days.'),
+    li('Aerobic efficiency is average speed in ft/min divided by average heart rate, from moving seconds after the first 10 minutes. Decoupling is the percent drop in that ratio from the first half to the second half. Both need at least 25 minutes of steady running and 90 percent heart rate coverage.'),
+    li('Performance index is Daniels’ VDOT formula applied to your best efforts of 1.9 miles or longer and your best 20 minute or longer windows, on runs with less than 158 ft of climb per mile. It is not Garmin’s VO2max.'),
+    li('Critical speed is a straight line fit of distance against time for your best 3, 5, 10 and 20 minute efforts in the past 180 days. The slope is critical speed and the intercept is D′.'),
+    li('Intensity distribution uses your Garmin heart rate zones (' + META.zone_floors.join(', ') + ' bpm floors). The polarization index is log10(low share / (moderate share x high share) x 100) with shares in percent.'),
+    li('Dates use Garmin’s local calendar date for each activity and each day, so moving between time zones does not shift sessions into the wrong day.')])]);
+  var chk = [];
+  chk.push(['Load vs Garmin training load', 'Garmin’s own load is only on ' + C['Activities with Garmin training load'] + ' activities, and it measures something different (post-exercise oxygen use). Over ' + lv.all.n + ' activities that have both, the rank correlation is ' + lv.all.spearman_r + '. By sport: runs ' + (lv.Run ? lv.Run.spearman_r : '–') + ', rides ' + (lv.Ride ? lv.Ride.spearman_r : '–') + ', hikes ' + (lv.Hike ? lv.Hike.spearman_r : '–') + '. The scales differ: Garmin gives long easy hikes about a quarter of the TRIMP value and runs about 1.8 times, so TRIMP weights long low-intensity days more heavily than Garmin does.']);
+  [['1609.344', '1 mile'], ['5000', '3.1 mile'], ['10000', '6.2 mile']].forEach(function (d) { var b = be[d[0]]; if (b) chk.push(['Best ' + d[1] + ' vs Garmin splits', b.n + ' runs: ' + pct(b.within_2s) + ' within 2 s, ' + pct(b.within_15s) + ' within 15 s. Longer distances disagree more because Garmin sometimes uses elapsed time rather than timer time for the same run.']); });
+  if (V.best_20min_power_vs_garmin.n) chk.push(['20 minute power vs Garmin', V.best_20min_power_vs_garmin.n + ' rides, median ratio ' + V.best_20min_power_vs_garmin.median_ratio + '.']);
+  chk.push(['Sleep stages', 'Deep + light + REM equals total sleep within two minutes on ' + pct(V.sleep_stages_sum_to_total.share_within_2min) + ' of ' + V.sleep_stages_sum_to_total.n + ' nights.']);
+  var c2 = plainCard('Checks against Garmin’s own numbers', null, [table([{ h: 'Check', k: '0' }, { h: 'Result', k: '1', wrap: 1 }], chk.map(function (c) { return { 0: c[0], 1: c[1] }; }))]);
+  var cov = [];
+  ['Activities', 'Resting HR', 'Sleep', 'HRV', 'Stress', 'Body Battery', 'Steps', 'Weight'].forEach(function (k) { var c = C[k]; if (c) cov.push({ k: k, n: c.days, a: c.first, b: c.last }); });
+  var c3 = plainCard('Data coverage', 'Days with data for each measure. Activities counts sessions.', [table([{ h: 'Measure', k: 'k' }, { h: 'Days', k: 'n', n: 1 }, { h: 'First', k: 'a' }, { h: 'Last', k: 'b' }], cov)]);
+  var c4 = plainCard('Gaps and limits', null, [H('ul', { class: 'plain' }, [
+    li(C.VO2max), li(C.Gear),
+    li(C['Activities with heart rate'] + ' of ' + C.Activities.days + ' activities have usable heart rate. ' + V.load_imputed_activities + ' without it got an estimated load from your typical load per minute in that sport, capped at four hours.'),
+    li(V.excluded_over_24h.length + ' activities longer than 24 hours (' + V.excluded_over_24h.map(function (e) { return e.hours + ' h on ' + e.date; }).join(', ') + ') were left out as forgotten timers.'),
+    li('Only ' + C.Weight.days + ' weigh-ins exist, so there is no body weight trend.'),
+    li('Heart rate zones, resting HR and max HR are today’s Garmin settings. Earlier years may have used different values, which slightly shifts older load and zone numbers.'),
+    li('Data generated ' + DATA.generated.replace('T', ' ') + ' from the Garmin Connect Personal API. The live app refreshes itself every 10 minutes.')])]);
+  var r = row(); r.appendChild(c1); r.appendChild(c2); var r2 = row(); r2.appendChild(c3); r2.appendChild(c4);
+}
+
+/* ---------- tab: kyoto marathon ---------- */
+var RACE = dn('2027-02-21'), B0 = dn('2026-11-09'), MAR_M = 42195, MAR_MI = 26.2188;
+var WD = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'], WDL = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+var MONF = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+var EASY_HR = Math.round(META.max_hr * 0.76), HARD_HR = Math.round(META.max_hr * 0.83);
+var MS = { view: 'cal', month: null, sel: null, goal: 174.5, cells: {} };
+try { var gsv = +localStorage.getItem('ti-goal'); if (gsv >= 150 && gsv <= 300 && localStorage.getItem('ti-goal-v') === '2') MS.goal = gsv; } catch (e) { }
+var MT = { E: { n: 'Easy' }, M: { n: 'Moderate' }, H: { n: 'Hard' }, L: { n: 'Long' }, X: { n: 'Cross-train' }, R: { n: 'Race' } };
+var PN = { E: 'Easy', Q: 'Quality', L: 'Long', Z: 'Rest', G: 'Race' }, P2T = { E: 'E', Q: 'H', L: 'L', G: 'R' };
+
+function wkStart(d) { return d - ((d + 3) % 7); }
+function todayNum() { var t = new Date(); return Date.UTC(t.getFullYear(), t.getMonth(), t.getDate()) / 864e5; }
+function vo2v(v) { return -4.6 + 0.182258 * v + 0.000104 * v * v; }
+function vo2pct(t) { return 0.8 + 0.1894393 * Math.exp(-0.012778 * t) + 0.2989558 * Math.exp(-0.1932605 * t); }
+function vdotOf(dm, tmin) { return vo2v(dm / tmin) / vo2pct(tmin); }
+function velAt(o) { var a = 0.000104, b = 0.182258, c = -4.6 - o; return (-b + Math.sqrt(b * b - 4 * a * c)) / (2 * a); }
+function spm(v) { return 1609.344 / v * 60; }
+function predictMin(V, dm) { var lo = 5, hi = 900; for (var i = 0; i < 60; i++) { var mid = (lo + hi) / 2; if (vdotOf(dm, mid) > V) lo = mid; else hi = mid; } return lo; }
+function curVdot() { for (var i = N - 1; i >= 0; i--) if (D.vdot90[i] != null) return D.vdot90[i]; return null; }
+function paces() {
+  var gs = MS.goal * 60, V = vdotOf(MAR_M, MS.goal), mp = gs / MAR_MI, mx = META.max_hr, cvv = curVdot(), ez = Math.max(mp + 60, spm(velAt(0.74 * Math.min(V, cvv || V))));
+  return { V: V, gs: gs, mp: mp, e1: ez, e2: ez + 60, l1: Math.max(mp + 45, ez - 15), l2: Math.max(mp + 45, ez - 15) + 45, t: spm(velAt(0.88 * V)), i: spm(velAt(0.975 * V)), mx: mx };
+}
+function md(d) { var x = new Date(d * 864e5); return MON[x.getUTCMonth()] + ' ' + x.getUTCDate(); }
+function fm(v) { return v >= 100 ? f0(v) : f1(v); }
+function pmi(s) { return ptime(s) + ' /mi'; }
+function prange(a, b) { return ptime(a) + ' to ' + ptime(b) + ' /mi'; }
+
+/* plan: [Mon, Wed, Thu, Fri, Sat miles, quality session, long run note, week note] */
+var PW = [
+  [5, 7, 3, 5, 12, '3 mi at tempo pace', 'Long run, all easy', 'Hold the volume near what you just ran so your legs can catch up with the jump you made in October.', 0],
+  [5, 7, 4, 5, 13, '4 mi at tempo pace', 'Long run, all easy', '', 0],
+  [5, 8, 4, 5, 14, '5 × 1 mi at threshold pace, 90 sec jog between', 'Long run, all easy', '', 0],
+  [5, 7, 3, 5, 10, '8 × 1 min fast, 1 min easy (fartlek)', 'Cutback long run, all easy', 'Cutback week. Absorb the last three weeks.', 0],
+  [6, 8, 4, 4, 15, '2 × 2.5 mi at threshold pace, 3 min jog', 'Long run, all easy', 'A short Sunday recovery run joins the week. Six run days from here.', 3],
+  [6, 9, 4, 5, 16, '6 mi at marathon pace', 'Long run, all easy', 'First real marathon pace block.', 3],
+  [6, 9, 5, 5, 17, '3 × 2 mi at threshold pace, 2 min jog', 'Long run, all easy. Do it Saturday, before the holiday trip starts', '', 4],
+  [5, 6, 4, 5, 12, '2 mi at tempo pace, keep it short', 'Cutback long run, all easy', 'Holiday week, flexible. Protect the long run and one other run. Everything else is optional.', 0],
+  [6, 10, 6, 6, 17, '7 mi at marathon pace', 'Long run, all easy', 'Back to full routine after the holiday week.', 4],
+  [7, 10, 6, 6, 18, '4 × 1.5 mi at threshold pace, 2 min jog', 'Long run, all easy', '', 4],
+  [7, 10, 6, 6, 20, '8 mi at marathon pace', 'First 20 miler, all easy', '', 5],
+  [7, 11, 7, 7, 20, '6 mi at tempo pace', '20 miles: 14 easy, then 6 at marathon pace', 'Peak week. Your last long run, three weeks before the race.', 5],
+  [6, 8, 5, 5, 14, '3 × 2 mi at marathon pace, 2 min jog', 'Relaxed 14, all easy', 'Taper begins. Volume drops, sharpness stays.', 4],
+  [5, 6, 3, 4, 10, '2 mi at marathon pace inside a 6 mile run', 'Easy 10', 'Keep it boring. Sleep and food matter more than miles now.', 0],
+  [4, 5, 3, 0, 0, '', '', 'Race week. Nothing new: shoes, food, clothes, routine.', 0]
+];
+var PLAN = PW.map(function (r, k) {
+  var days;
+  if (k === 14) days = [{ t: 'E', mi: 4, d: 'Easy, relaxed' }, { t: 'Z', mi: 0, d: 'Rest or light strength' }, { t: 'Q', mi: 5, d: '2 mi at marathon pace inside 5 mi' }, { t: 'E', mi: 3, d: 'Easy plus 4 strides' }, { t: 'Z', mi: 0, d: 'Rest. Travel, hydrate, lay out gear' }, { t: 'E', mi: 2, d: 'Shakeout plus 4 strides' }, { t: 'G', mi: 26.2, d: 'Kyoto Marathon, 9:00 start' }];
+  else days = [{ t: 'E', mi: r[0], d: 'Easy aerobic run' }, { t: 'Z', mi: 0, d: 'Rest or strength (calisthenics, single leg work)' }, { t: 'Q', mi: r[1], d: r[5] }, { t: 'E', mi: r[2], d: 'Easy aerobic run' }, { t: 'E', mi: r[3], d: 'Easy run plus 6 strides' }, { t: 'L', mi: r[4], d: r[6] }, r[8] ? { t: 'E', mi: r[8], d: 'Short recovery run, very easy' } : { t: 'Z', mi: 0, d: 'Rest, or an easy hike or spin' }];
+  return { n: k + 1, start: B0 + 7 * k, phase: k < 4 ? 'Base build' : k < 8 ? 'Build' : k < 12 ? 'Peak' : 'Taper', total: sum(days.map(function (x) { return x.mi; })), days: days, note: r[7] || '' };
+});
+function planDay(d) { var k = Math.floor((wkStart(d) - B0) / 7); if (k < 0 || k > 14) return null; var w = PLAN[k], x = w.days[d - wkStart(d)]; return { t: x.t, mi: x.mi, d: x.d, wk: w.n, phase: w.phase }; }
+function planWeek(ws) { var k = Math.floor((ws - B0) / 7); return k >= 0 && k <= 14 ? PLAN[k] : null; }
+
+/* activity classification */
+var DAYACT = null;
+function buildDayAct() { if (DAYACT) return; DAYACT = {}; A.forEach(function (a) { (DAYACT[a.dn] = DAYACT[a.dn] || []).push(a); }); }
+function effort(a) { var z = a.zone_s, t = z ? sum(z) : 0; if (z && t && z[5] / t >= 0.25) return 'H'; if (a.avg_hr == null) return 'E'; return a.avg_hr >= HARD_HR ? 'H' : a.avg_hr >= EASY_HR ? 'M' : 'E'; }
+function atype(a) { if (a.group !== 'Run') return 'X'; var m = mi(a.dist_km); if (a.dn === RACE && m > 20) return 'R'; if (m >= 9) return 'L'; return effort(a); }
+function pacePerMi(a) { var m = mi(a.dist_km); if (!(m > 0.2)) return null; return a.speed ? 1609.344 / a.speed : a.dur_min * 60 / m; }
+function weekStat(ws) {
+  var o = { ws: ws, runs: 0, mi: 0, long: 0, by: { E: 0, M: 0, H: 0, L: 0, R: 0 }, eff: { E: 0, M: 0, H: 0 }, x: 0 };
+  for (var d = ws; d < ws + 7; d++) (DAYACT[d] || []).forEach(function (a) {
+    if (a.group === 'Run') { var m = mi(a.dist_km); o.runs++; o.mi += m; o.long = Math.max(o.long, m); o.by[atype(a)] += m; o.eff[effort(a)] += m; } else o.x += a.dur_min / 60;
+  });
+  return o;
+}
+function tClass(t) { return 't-' + t; }
+
+/* call: is the plan still right for this week? */
+function planCall() {
+  var td = todayNum(), ws = wkStart(td), all = fit('All'), ai = N - 1; while (ai > 0 && all.acwr[ai] == null) ai--; var ac = all.acwr[ai];
+  var lag = td - DAYN > 2 ? ' Data runs through ' + dlabel(DAYN) + ', so run the refresh command to bring it up to date.' : '';
+  if (td < B0 + 7) {
+    var rec = [weekStat(B0 - 7), weekStat(B0 - 14), weekStat(B0 - 21)].map(function (w) { return w.mi; });
+    return { k: ac != null && ac > 1.5 ? 'serious' : 'good', t: ac != null && ac > 1.5 ? 'Start cautiously' : 'Start as planned', d: 'Your last three weeks were ' + rec.map(f0).join(', ') + ' miles, so ' + f0(PLAN[0].total) + ' in week 1 is a controlled start.' + (ac != null && ac > 1.3 ? ' Your load ratio is ' + f2(ac) + ', so keep the easy days truly easy.' : '') + lag };
+  }
+  var pw = planWeek(ws - 7), a = weekStat(ws - 7);
+  if (!pw) return { k: 'good', t: 'On track', d: 'The block is complete or not started.' + lag };
+  var r = pw.total > 0 ? a.mi / pw.total : 1;
+  if (r > 1.2 || (ac != null && ac > 1.5)) return { k: 'serious', t: 'Back off a little', d: 'Last week was ' + pct(r) + ' of plan' + (ac != null ? ' and your load ratio is ' + f2(ac) : '') + '. Hold this week at last week’s mileage and run the easy days easier.' + lag };
+  if (r < 0.75) return { k: 'warn', t: 'Behind plan', d: 'Last week was ' + pct(r) + ' of plan. Repeat that volume instead of jumping ahead, then resume the progression.' + lag };
+  return { k: 'good', t: 'On track', d: 'Last week was ' + pct(r) + ' of plan.' + lag };
+}
+
+/* ---------- hero ---------- */
+function marHero() {
+  var td = todayNum(), P = paces(), cv = curVdot(), predS = cv ? predictMin(cv, MAR_M) * 60 : null, dleft = RACE - td, big, cap;
+  if (dleft > 0) { big = String(dleft); cap = 'days to the Kyoto Marathon · ' + Math.floor(dleft / 7) + ' weeks and ' + (dleft % 7) + ' days'; } else if (dleft === 0) { big = 'Today'; cap = 'Race day'; } else { big = 'Done'; cap = 'The race has passed'; }
+  var k = Math.floor((wkStart(td) - B0) / 7), phase = td < B0 ? 'Block starts ' + dlabel(B0) : k >= 0 && k <= 14 ? 'Week ' + (k + 1) + ' of 15 · ' + PLAN[k].phase : 'Block complete';
+  var prog = Math.max(0, Math.min(1, (td - B0) / (RACE - B0)));
+  var sel = H('select', { id: 'goal', 'aria-label': 'Goal finish time' });
+  var gopts = [160, 165, 170, 174.5]; for (var gm = 180; gm <= 270; gm += 5) gopts.push(gm); gopts.forEach(function (m) { var o = H('option', { value: String(m), text: (m === 174.5 ? 'Sub 2:55 · ' : '') + ptime(m * 60) + ' (' + ptime(m * 60 / MAR_MI) + ' /mi)' }); if (m === MS.goal) o.selected = true; sel.appendChild(o); });
+  sel.addEventListener('change', function () { MS.goal = +sel.value; try { localStorage.setItem('ti-goal', String(MS.goal)); localStorage.setItem('ti-goal-v', '2'); } catch (e) { } render(); });
+  var gap = predS ? predS - P.gs : null, fit_txt = predS ? ptime(predS) : '–';
+  var gtxt = gap == null ? '' : Math.abs(gap) < 60 ? 'Your goal is about what your current fitness predicts.' : gap > 0 ? 'The goal is ' + ptime(gap) + ' faster than today’s fitness predicts, a ' + f1(gap / predS * 100) + '% improvement to find in ' + Math.floor(dleft / 7) + ' weeks.' + (gap / predS > 0.06 ? ' Typical gains from one block are 3 to 6 percent, so this is a very aggressive target. It needs a near perfect build. Decide A, B and C goals after the January tune-up.' : '') : 'The goal is ' + ptime(-gap) + ' slower than today’s fitness predicts, so it should be comfortable.';
+  var meter = H('div', { class: 'meter', role: 'img', 'aria-label': 'Block progress ' + pct(prog) }, [H('i')]); meter.firstChild.style.width = (prog * 100) + '%';
+  return H('section', { class: 'hero mhero', 'aria-label': 'Kyoto Marathon countdown' }, [
+    H('div', null, [H('div', { class: 'eyebrow', text: 'Kyoto Marathon · Sunday, Feb 21, 2027' }), H('div', { class: 'big', text: big }), H('div', { class: 'cap', text: cap }), H('div', { class: 'phase', text: phase }), meter, H('div', { class: 'hint', text: 'Block runs ' + md(B0) + ' to ' + md(RACE) + ' · 9:00 start · 6 hour limit' })]),
+    H('div', { class: 'hero-r' }, [H('label', { class: 'eyebrow', for: 'goal', text: 'Goal finish time' }), sel,
+      H('div', { class: 'hero-stats' }, [H('div', null, [H('b', { text: ptime(P.mp) }), H('span', { text: 'goal pace per mile' })]), H('div', null, [H('b', { text: fit_txt }), H('span', { text: 'what today’s fitness predicts' })]), H('div', null, [H('b', { text: cv ? f1(cv) : '–' }), H('span', { text: 'VDOT, 90 day best' })])]),
+      H('p', { class: 'ghint', text: gtxt })])]);
+}
+function marTiles() {
+  var td = todayNum(), k = Math.floor((wkStart(td) - B0) / 7), kk = Math.max(0, Math.min(14, k)), pw = PLAN[kk], ws = pw.start, a = weekStat(ws), tl = H('div', { class: 'tiles' });
+  tl.appendChild(tile(td < B0 ? 'Week 1 plan' : 'This week', f1(td < B0 ? 0 : a.mi), 'of ' + f0(pw.total) + ' mi', td < B0 ? 'starts ' + dlabel(B0) : pct(pw.total ? a.mi / pw.total : 0) + ' of plan', ''));
+  var pl = 0, ac = 0; for (var d = B0; d < td && d <= RACE; d++) { var p = planDay(d); if (p && p.t !== 'G') pl += p.mi; (DAYACT[d] || []).forEach(function (x) { if (x.group === 'Run') ac += mi(x.dist_km); }); }
+  tl.appendChild(tile('Block miles so far', f1(ac), 'of ' + f0(pl) + ' planned', td <= B0 ? 'block starts ' + md(B0) : pl ? pct(ac / pl) + ' of the plan to date' : '', ''));
+  var nl = null; for (d = Math.max(td, B0); d <= RACE; d++) { var q = planDay(d); if (q && q.t === 'L') { nl = { d: d, mi: q.mi }; break; } }
+  var rl = 0; for (d = td - 56; d < td; d++) (DAYACT[d] || []).forEach(function (x) { if (x.group === 'Run') rl = Math.max(rl, mi(x.dist_km)); });
+  tl.appendChild(tile('Next long run', nl ? f0(nl.mi) : '–', 'mi', nl ? dlabel(nl.d) + ' · longest in 8 weeks: ' + f1(rl) + ' mi' : '', ''));
+  var c = planCall(); tl.appendChild(tile('The call', c.t, '', c.d, (c.k === 'good' ? 'good' : 'bad') + ' txt'));
+  return tl;
+}
+
+/* ---------- calendar ---------- */
+function legend() {
+  var items = [['E', 'Easy', 'HR under ' + EASY_HR], ['M', 'Moderate', 'HR ' + EASY_HR + ' to ' + (HARD_HR - 1)], ['H', 'Hard or quality', 'HR ' + HARD_HR + '+ or planned workout'], ['L', 'Long run', '9+ mi'], ['X', 'Cross-train', 'ride, hike, other'], ['R', 'Race', '']];
+  var l = H('div', { class: 'legend mlegend' });
+  items.forEach(function (x) { var k = H('i', { class: 'k-box' }); k.style.background = 'var(--t-' + x[0].toLowerCase() + ')'; l.appendChild(H('span', null, [k, x[1] + (x[2] ? ' (' + x[2] + ')' : '')])); });
+  l.appendChild(H('span', null, [H('i', { class: 'k-dash' }), 'Dashed outline is planned']));
+  return l;
+}
+function pill(t, text, kind) { return H('div', { class: 'cp ' + kind + ' ' + tClass(t) }, [H('span', { class: 'ck', text: t }), H('span', { class: 'cv', text: text })]); }
+function dayLabel(d, acts, pl) {
+  var parts = [WDL[(d + 3) % 7] + ' ' + dlabel(d)];
+  acts.forEach(function (a) { parts.push(MT[atype(a)].n + ' ' + (a.group === 'Run' ? f1(mi(a.dist_km)) + ' miles' : a.sp)); });
+  if (pl) parts.push('plan: ' + PN[pl.t] + (pl.mi ? ' ' + f1(pl.mi) + ' miles' : ''));
+  return parts.join(', ');
+}
+function dayTip(d, acts, pl) {
+  var rows = [];
+  acts.forEach(function (a) { var t = atype(a); rows.push({ name: a.group === 'Run' ? MT[t].n + ' run' : a.sp, value: a.group === 'Run' ? f1(mi(a.dist_km)) + ' mi' : (a.dist_km > 0 ? f1(mi(a.dist_km)) + ' mi' : f0(a.dur_min) + ' min'), color: 'var(--t-' + t.toLowerCase() + ')', shape: 'box' }); });
+  if (pl && pl.t !== 'Z') rows.push({ name: 'Plan: ' + PN[pl.t], value: pl.mi ? f1(pl.mi) + ' mi' : '' });
+  if (!rows.length) rows.push({ name: pl && pl.t === 'Z' ? 'Rest day' : 'Nothing logged', value: '' });
+  return { head: WD[(d + 3) % 7] + ' ' + dlabel(d), rows: rows };
+}
+function drawCal() {
+  var host = MS.calHost, td = todayNum(); host.textContent = ''; MS.cells = {};
+  var ym = MS.month.split('-'), y = +ym[0], mo = +ym[1] - 1, first = Date.UTC(y, mo, 1) / 864e5, last = Date.UTC(y, mo + 1, 0) / 864e5;
+  var months = ['2026-10', '2026-11', '2026-12', '2027-01', '2027-02'], ix = months.indexOf(MS.month);
+  var nav = H('div', { class: 'calnav' });
+  var prev = H('button', { type: 'button', class: 'icon', 'aria-label': 'Previous month', text: '‹' }), next = H('button', { type: 'button', class: 'icon', 'aria-label': 'Next month', text: '›' });
+  prev.disabled = ix <= 0; next.disabled = ix >= months.length - 1;
+  prev.addEventListener('click', function () { MS.month = months[ix - 1]; drawCal(); }); next.addEventListener('click', function () { MS.month = months[ix + 1]; drawCal(); });
+  var chips = H('div', { class: 'seg', role: 'group', 'aria-label': 'Month' });
+  months.forEach(function (m) { var yy = +m.slice(0, 4), mm = +m.slice(5) - 1, b = H('button', { type: 'button', text: MON[mm] + (mm === 0 ? ' ' + yy : ''), 'aria-pressed': String(m === MS.month) }); b.addEventListener('click', function () { MS.month = m; drawCal(); }); chips.appendChild(b); });
+  var tb = H('button', { type: 'button', class: 'icon', text: 'Today' }); tb.addEventListener('click', function () { var t = new Date(); MS.month = t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0'); if (months.indexOf(MS.month) < 0) MS.month = months[months.length - 1]; MS.sel = td; drawCal(); drawDetail(); });
+  nav.appendChild(prev); nav.appendChild(H('h2', { class: 'calt', text: MONF[mo] + ' ' + y })); nav.appendChild(next); nav.appendChild(chips); nav.appendChild(tb);
+  host.appendChild(nav); host.appendChild(legend());
+  var g = H('div', { class: 'cal', role: 'grid', 'aria-label': MONF[mo] + ' ' + y + ' training calendar' });
+  WD.forEach(function (w) { g.appendChild(H('div', { class: 'wd', text: w })); }); g.appendChild(H('div', { class: 'wd wsum', text: 'Week' }));
+  for (var ws = wkStart(first); ws <= last; ws += 7) {
+    for (var d = ws; d < ws + 7; d++) {
+      var acts = DAYACT[d] || [], pl = planDay(d), out = d < first || d > last, isF = d >= td, synced = d <= DAYN;
+      var cell = H('div', { class: 'day' + (out ? ' out' : '') + (d === td ? ' today' : '') + (d === MS.sel ? ' sel' : '') + (d === RACE ? ' race' : ''), tabindex: '0', role: 'gridcell', 'aria-label': dayLabel(d, acts, pl), 'aria-selected': String(d === MS.sel) });
+      var top = H('div', { class: 'dtop' }, [H('span', { class: 'dn', text: String(new Date(d * 864e5).getUTCDate()) })]);
+      if (pl && pl.t !== 'Z' && pl.t !== 'G') top.appendChild(H('span', { class: 'dp', text: pl.mi ? 'plan ' + f0(pl.mi) : '' }));
+      cell.appendChild(top);
+      var runs = acts.filter(function (a) { return a.group === 'Run'; });
+      acts.slice(0, 3).forEach(function (a) { var t = atype(a); cell.appendChild(pill(t, a.group === 'Run' ? f1(mi(a.dist_km)) : (a.dist_km > 0 ? f0(mi(a.dist_km)) : f0(a.dur_min / 60) + 'h'), 'done')); });
+      if (acts.length > 3) cell.appendChild(H('div', { class: 'more', text: '+' + (acts.length - 3) + ' more' }));
+      if (d === RACE) cell.appendChild(pill('R', '26.2', 'done'));
+      else if (pl && pl.t !== 'Z' && !runs.length && (isF || !synced)) cell.appendChild(pill(P2T[pl.t], f0(pl.mi), 'plan'));
+      else if (pl && pl.t !== 'Z' && !runs.length && !isF && synced) cell.appendChild(H('div', { class: 'skip', text: 'skipped' }));
+      else if (pl && pl.t === 'Z' && !acts.length) cell.appendChild(H('div', { class: 'rest', text: 'rest' }));
+      (function (d_, a_, p_, c_) {
+        c_.addEventListener('click', function () { selectDay(d_); if (window.innerWidth <= 640) { var dd = document.querySelector('.detail'); if (dd) dd.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); } });
+        c_.addEventListener('keydown', function (ev) { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); selectDay(d_); } });
+        c_.addEventListener('pointermove', function (ev) { if (ev.pointerType !== 'mouse') return; var t = dayTip(d_, a_, p_); showTip(ev.clientX, ev.clientY, t.head, t.rows); }); c_.addEventListener('pointerleave', hideTip);
+        c_.addEventListener('focus', function () { var r = c_.getBoundingClientRect(), t = dayTip(d_, a_, p_); showTip(r.left + r.width / 2, r.top, t.head, t.rows); }); c_.addEventListener('blur', hideTip);
+      })(d, acts, pl, cell);
+      MS.cells[d] = cell; g.appendChild(cell);
+    }
+    var s = weekStat(ws), pw = planWeek(ws), wc = H('div', { class: 'wsc' });
+    var weekEnd = ws + 6, isCur = td >= ws && td <= weekEnd;
+    if (pw) {
+      var done = weekEnd < td, ratio = pw.total ? s.mi / pw.total : 0;
+      wc.appendChild(H('div', { class: 'wl', text: 'Wk ' + pw.n + ' · ' + pw.phase }));
+      wc.appendChild(H('div', { class: 'wv' }, [H('b', { text: ws > td ? f0(pw.total) : f1(s.mi) }), H('span', { text: ws > td ? ' mi planned' : ' of ' + f0(pw.total) })]));
+      var bar = H('div', { class: 'meter thin', role: 'img', 'aria-label': pct(ratio) + ' of planned miles' }, [H('i')]); bar.firstChild.style.width = Math.min(100, ratio * 100) + '%'; if (done && ratio > 1.2) bar.firstChild.style.background = 'var(--crit)'; else if (done && ratio < 0.75) bar.firstChild.style.background = 'var(--warn)'; if (ws <= td) wc.appendChild(bar);
+    } else { wc.appendChild(H('div', { class: 'wl', text: 'Before block' })); wc.appendChild(H('div', { class: 'wv' }, [H('b', { text: f1(s.mi) }), H('span', { text: ' mi' })])); }
+    if (isCur) wc.classList.add('cur');
+    g.appendChild(wc);
+  }
+  host.appendChild(g);
+}
+function selectDay(d) { var old = MS.cells[MS.sel]; if (old) { old.classList.remove('sel'); old.setAttribute('aria-selected', 'false'); } MS.sel = d; var c = MS.cells[d]; if (c) { c.classList.add('sel'); c.setAttribute('aria-selected', 'true'); } drawDetail(); }
+function guide(pl) {
+  var P = paces(), x = pl.d, tx = '';
+  if (pl.t === 'E') tx = 'Keep heart rate under ' + EASY_HR + '. Expect roughly ' + prange(P.e1, P.e2) + ', and let heart rate win any argument with pace. ' + (/strides/.test(x) ? 'Strides: 6 × 20 seconds fast but relaxed, walk back between.' : '');
+  else if (pl.t === 'L') tx = 'Run ' + prange(P.l1, P.l2) + ', heart rate under ' + Math.round(META.max_hr * 0.79) + '. ' + (/marathon pace/.test(x) ? 'The marathon pace segment is ' + pmi(P.mp) + '. ' : '') + 'Practice the fueling you plan to use in Kyoto: 30 to 60 grams of carbs per hour.';
+  else if (pl.t === 'Q') tx = 'Total ' + f0(pl.mi) + ' mi including about 3 mi of easy warm-up and cool-down. ' + (/marathon pace/.test(x) ? 'Marathon pace is ' + pmi(P.mp) + '.' : /threshold|tempo/.test(x) ? 'Threshold pace is about ' + pmi(P.t) + ', comfortably hard, a pace you could hold for an hour.' : /fartlek|fast/.test(x) ? 'The fast minutes are about ' + pmi(P.i) + '.' : '');
+  else if (pl.t === 'G') tx = 'Start at ' + pmi(P.mp + 5) + ' for the first 3 miles, settle to ' + pmi(P.mp) + ', and save the effort for after mile 20.';
+  return tx;
+}
+function drawDetail() {
+  var host = MS.detHost, td = todayNum(), d = MS.sel; host.textContent = ''; if (d == null) return;
+  var acts = DAYACT[d] || [], pl = planDay(d), P = paces();
+  var c = H('div', { class: 'card detail' }, [H('div', { class: 'dh' }, [H('h2', { text: WDL[(d + 3) % 7] + ', ' + dlabel(d) }), pl ? H('span', { class: 'pill neutral' }, [H('i'), 'Week ' + pl.wk + ' · ' + pl.phase]) : null])]);
+  var cols = H('div', { class: 'dcols' });
+  var pc = H('div', { class: 'dcol' }, [H('div', { class: 'eyebrow', text: 'Plan' })]);
+  if (pl) {
+    var tp = P2T[pl.t];
+    pc.appendChild(H('div', { class: 'dline' }, [tp ? H('span', { class: 'cp done ' + tClass(tp) }, [H('span', { class: 'ck', text: tp }), H('span', { class: 'cv', text: PN[pl.t] })]) : H('span', { class: 'pill neutral' }, [H('i'), 'Rest']), pl.mi ? H('b', { text: ' ' + f1(pl.mi) + ' mi' }) : null]));
+    pc.appendChild(H('p', { text: pl.d })); var gtx = guide(pl); if (gtx) pc.appendChild(H('p', { class: 'muted', text: gtx }));
+    var pwk = planWeek(wkStart(d)); if (pwk && pwk.note) pc.appendChild(H('p', { class: 'muted', text: 'Week note: ' + pwk.note }));
+  } else pc.appendChild(H('p', { class: 'muted', text: 'Outside the 15 week block.' }));
+  var ac = H('div', { class: 'dcol' }, [H('div', { class: 'eyebrow', text: 'What you did' })]);
+  if (!acts.length) ac.appendChild(H('p', { class: 'muted', text: d > DAYN && d <= td ? 'Nothing synced for this day yet. The app refreshes itself every 10 minutes.' : d >= td ? 'Not yet.' : pl && pl.t === 'Z' ? 'Rest day, as planned.' : 'Nothing logged.' }));
+  acts.forEach(function (a) {
+    var t = atype(a), m = mi(a.dist_km), pc_ = pacePerMi(a), line = H('div', { class: 'act' });
+    line.appendChild(H('div', { class: 'dline' }, [H('span', { class: 'cp done ' + tClass(t) }, [H('span', { class: 'ck', text: t }), H('span', { class: 'cv', text: a.group === 'Run' ? MT[t].n + ' run' : a.sp })]), H('b', { text: m > 0 ? ' ' + f1(m) + ' mi' : ' ' + f0(a.dur_min) + ' min' })]));
+    var bits = [f0(a.dur_min) + ' min']; if (pc_ && a.group === 'Run') bits.push(pmi(pc_)); if (a.avg_hr) bits.push(f0(a.avg_hr) + ' bpm avg'); if (a.elev) bits.push(f0(ft(a.elev)) + ' ft climbed'); if (a.load) bits.push(f0(a.load) + ' load');
+    line.appendChild(H('p', { class: 'muted', text: bits.join(' · ') }));
+    if (a.group === 'Run' && pl) {
+      var note = '';
+      if (pl.t === 'E' && effort(a) !== 'E') note = 'Planned easy, but average heart rate was ' + f0(a.avg_hr) + ' against a cap of ' + EASY_HR + '. Slow down by about ' + Math.max(15, Math.round((a.avg_hr - EASY_HR) * 4 / 5) * 5) + ' seconds per mile next time.';
+      else if (pl.t === 'L' && pc_ && pc_ < P.l1 - 15) note = 'Long run was ' + Math.round(P.l1 - pc_) + ' seconds per mile faster than the long run range. Save that speed for the marathon pace segments.';
+      else if (pl.mi && m) { var df = m - pl.mi; note = Math.abs(df) < 0.6 ? 'Right on the planned distance.' : (df > 0 ? f1(df) + ' mi over plan.' : f1(-df) + ' mi under plan.'); }
+      if (note) line.appendChild(H('p', { class: 'dnote', text: note }));
+    }
+    ac.appendChild(line);
+  });
+  cols.appendChild(pc); cols.appendChild(ac); c.appendChild(cols); host.appendChild(c);
+}
+function nextDays() {
+  var td = todayNum(), row = H('div', { class: 'next7' });
+  for (var d = td; d < td + 7; d++) {
+    var pl = planDay(d), tp = pl ? P2T[pl.t] : null, card = H('button', { type: 'button', class: 'nd' + (tp ? ' ' + tClass(tp) : '') }, [H('div', { class: 'ndh' }, [H('b', { text: WD[(d + 3) % 7] }), H('span', { text: md(d) })]), H('div', { class: 'ndm', text: pl ? (pl.mi ? f0(pl.mi) + ' mi' : 'Rest') : '–' }), H('div', { class: 'ndd', text: pl ? (pl.t === 'Q' ? 'Quality: ' + pl.d : pl.d) : 'No plan' })]);
+    (function (dd) { card.addEventListener('click', function () { MS.month = dstr(dd).slice(0, 7); drawCal(); selectDay(dd); }); })(d);
+    row.appendChild(card);
+  }
+  return row;
+}
+function viewCal() {
+  var wrap = H('div', { class: 'stackv' });
+  MS.calHost = H('div', { class: 'card calcard' }); MS.detHost = H('div');
+  var td = todayNum(); if (!MS.month) { var mth = dstr(td).slice(0, 7); MS.month = ['2026-10', '2026-11', '2026-12', '2027-01', '2027-02'].indexOf(mth) >= 0 ? mth : '2026-11'; } if (MS.sel == null) MS.sel = td;
+  wrap.appendChild(MS.calHost); wrap.appendChild(MS.detHost);
+  wrap.appendChild(H('div', { class: 'sechead' }, [H('h2', { class: 'sec', text: 'Next 7 days' })])); wrap.appendChild(nextDays());
+  app.appendChild(wrap); drawCal(); drawDetail();
+}
+
+/* ---------- weekly bars (custom) ---------- */
+function weekBars(parent, o) {
+  var W = o.weeks, w = 880, h = o.h || 270, m = { l: 40, r: 12, t: 20, b: 28 }, iw = w - m.l - m.r, ih = h - m.t - m.b, n = W.length, band = iw / n, bw = Math.min(24, band * 0.62), mx = 1;
+  W.forEach(function (x) { mx = Math.max(mx, sum(x.parts.map(function (p) { return p.v; })), x.plan || 0); });
+  var tk = niceTicks(0, mx * 1.04, 4), top = tk.hi || mx;
+  function Y(v) { return m.t + ih - v / top * ih; }
+  var svg = S('svg', { viewBox: '0 0 ' + w + ' ' + h, role: 'img', 'aria-label': o.aria });
+  tk.ticks.forEach(function (t) { S('line', { x1: m.l, x2: m.l + iw, y1: Y(t), y2: Y(t), style: 'stroke:var(--grid);stroke-width:1' }, svg); S('text', { x: m.l - 8, y: Y(t) + 4, 'text-anchor': 'end', text: f0(t) }, svg); });
+  var td = todayNum();
+  W.forEach(function (x, i) {
+    var cx = m.l + band * (i + .5), isCur = td >= x.s && td < x.s + 7;
+    if (isCur) S('rect', { x: m.l + band * i + 1, y: m.t - 6, width: band - 2, height: ih + 6, rx: 6, style: 'fill:var(--wash-a)' }, svg);
+    var yy = m.t + ih; x.parts.forEach(function (p) { if (p.v <= 0) return; var hh = p.v / top * ih; S('rect', { x: cx - bw / 2, y: yy - hh + 0.75, width: bw, height: Math.max(1, hh - 1.5), rx: 2, style: 'fill:' + p.color }, svg); yy -= hh; });
+    if (i % (n > 16 ? 2 : 1) === 0) S('text', { x: cx, y: h - 8, 'text-anchor': 'middle', text: md(x.s) }, svg);
+  });
+  var pts = W.map(function (x, i) { return x.plan != null ? [m.l + band * (i + .5), Y(x.plan)] : null; });
+  var pp = pts.filter(Boolean); if (pp.length > 1) S('path', { d: 'M' + pp.map(function (p) { return p[0].toFixed(1) + ' ' + p[1].toFixed(1); }).join('L'), style: 'fill:none;stroke:var(--ink);stroke-width:1.5;opacity:.55' }, svg);
+  pts.forEach(function (p) { if (p) S('circle', { cx: p[0].toFixed(1), cy: p[1].toFixed(1), r: 4, style: 'fill:var(--ink);stroke:var(--surface);stroke-width:2' }, svg); });
+  S('line', { x1: m.l, x2: m.l + iw, y1: m.t + ih, y2: m.t + ih, style: 'stroke:var(--axis);stroke-width:1' }, svg);
+  W.forEach(function (x, i) {
+    var r = S('rect', { x: m.l + band * i, y: m.t - 6, width: band, height: ih + 6, tabindex: '0', style: 'fill:transparent;cursor:default' }, svg);
+    function show(cx, cy) { var rows = x.parts.filter(function (p) { return p.v > 0; }).map(function (p) { return { name: p.label, value: f1(p.v) + ' mi', color: p.color, shape: 'box' }; }); if (x.plan != null) rows.push({ name: 'Plan', value: f0(x.plan) + ' mi', color: 'var(--ink)', shape: 'line' }); showTip(cx, cy, 'Week of ' + md(x.s) + (x.sub ? ' · ' + x.sub : ''), rows, x.plan ? pct(sum(x.parts.map(function (p) { return p.v; })) / x.plan) + ' of plan' : null); }
+    r.addEventListener('pointermove', function (ev) { show(ev.clientX, ev.clientY); }); r.addEventListener('pointerleave', hideTip);
+    r.addEventListener('focus', function () { var b = r.getBoundingClientRect(); show(b.left + b.width / 2, b.top + 20); }); r.addEventListener('blur', hideTip);
+  });
+  var lg = H('div', { class: 'legend' }); (o.legend || []).forEach(function (l) { var k = H('i', { class: l.line ? 'k-line' : 'k-box' }); k.style.background = l.color; lg.appendChild(H('span', null, [k, l.name])); });
+  var card = H('div', { class: 'card' }, [H('h2', { text: o.title }), H('p', { class: 'sub', text: o.sub }), lg, H('div', { class: 'chart' }, [svg])]);
+  var det = H('details', { class: 'tbl' }, [H('summary', { text: 'View as table' })]), fl = false;
+  det.addEventListener('toggle', function () { if (det.open && !fl) { fl = true; det.appendChild(table([{ h: 'Week of', f: function (r) { return md(r.s); } }].concat((o.cols || []).map(function (c) { return { h: c.h, n: 1, f: function (r) { return c.f(r); } }; })), W)); } });
+  card.appendChild(det); parent.appendChild(card); return card;
+}
+var TC = [['E', 'Easy'], ['M', 'Moderate'], ['H', 'Hard'], ['L', 'Long'], ['R', 'Race']];
+
+/* ---------- block view ---------- */
+function viewBlock() {
+  var wrap = H('div', { class: 'stackv' }), td = todayNum(), ws0 = B0 - 56, W = [], k;
+  for (k = 0; k < 23; k++) { var ws = ws0 + 7 * k, s = weekStat(ws), pw = planWeek(ws); W.push({ s: ws, a: s, plan: pw ? pw.total : null, sub: pw ? 'Wk ' + pw.n + ' · ' + pw.phase : 'before block', parts: TC.map(function (c) { return { label: MT[c[0]].n, color: 'var(--t-' + c[0].toLowerCase() + ')', v: s.by[c[0]] || 0 }; }) }); }
+  var ph = H('div', { class: 'phases' });
+  [['Base build', 0, 3, 'Rebuild consistency and the long run'], ['Build', 4, 7, 'Add marathon pace work'], ['Peak', 8, 11, 'Biggest weeks, two 20 milers'], ['Taper', 12, 14, 'Cut volume, keep sharpness']].forEach(function (p) { var a = PLAN[p[1]], b = PLAN[p[2]], lo = Math.min.apply(null, PLAN.slice(p[1], p[2] + 1).map(function (x) { return x.total; })), hi = Math.max.apply(null, PLAN.slice(p[1], p[2] + 1).map(function (x) { return x.total; })); ph.appendChild(H('div', { class: 'ph' }, [H('b', { text: p[0] }), H('span', { text: md(a.start) + ' to ' + md(b.start + 6) }), H('span', { text: f0(lo) + ' to ' + f0(hi) + ' mi per week' }), H('p', { text: p[3] })])); });
+  wrap.appendChild(ph);
+  weekBars(wrap, { weeks: W, aria: 'Weekly running miles by type against the plan', title: 'Weekly miles against the plan', sub: 'Bars are the miles you ran, colored by run type. The dark line is the plan. Eight weeks of history lead in so you can see the ramp.', legend: TC.slice(0, 4).map(function (c) { return { name: MT[c[0]].n, color: 'var(--t-' + c[0].toLowerCase() + ')' }; }).concat([{ name: 'Plan', color: 'var(--ink)', line: 1 }]), cols: [{ h: 'Miles', f: function (r) { return f1(r.a.mi); } }, { h: 'Plan', f: function (r) { return r.plan != null ? f0(r.plan) : '–'; } }, { h: 'Runs', f: function (r) { return r.a.runs; } }, { h: 'Longest', f: function (r) { return f1(r.a.long); } }] });
+  // long run chart
+  var lx0 = B0 - 56, lp = [], la = A.filter(function (a) { return a.group === 'Run' && a.dn >= lx0 && mi(a.dist_km) >= 8; });
+  PLAN.forEach(function (w) { var l = w.days[5]; if (l.t === 'L') lp.push([w.start + 5, l.mi]); });
+  chartCard(wrap, { title: 'Long run ladder', sub: 'Orange line is the planned long run. Dots are your runs of 8 miles or more. The plan reaches 20 miles twice, the last one three weeks before the race.', spec: function () { return { h: 240, x0: lx0, x1: RACE + 4, zero: true, hover: 'point', yFmt: function (v) { return f0(v) + ' mi'; }, series: [{ name: 'Planned long run', kind: 'line', markers: true, color: 'var(--s2)', x: lp.map(function (p) { return p[0]; }), y: lp.map(function (p) { return p[1]; }), fmt: function (v) { return f0(v) + ' mi'; } }, { name: 'Your long runs', kind: 'dots', color: 'var(--s1)', op: .8, x: la.map(function (a) { return a.dn; }), y: la.map(function (a) { return +mi(a.dist_km).toFixed(1); }), fmt: function (v) { return f1(v) + ' mi'; } }] }; } });
+  // table
+  var rows = PLAN.map(function (w) {
+    var s = weekStat(w.start), done = w.start + 6 < td, cur = td >= w.start && td <= w.start + 6, r = w.total ? s.mi / w.total : 0;
+    var st_ = w.start > td ? ['neutral', 'Upcoming'] : cur ? ['good', 'In progress'] : r > 1.2 ? ['serious', 'Over'] : r < 0.75 ? ['warn', 'Under'] : ['good', 'On plan'];
+    return { w: w, s: s, st: st_, ql: w.days[2].t === 'Q' ? w.days[2].d : w.days[2].d, ls: w.days[5].t === 'L' ? w.days[5].mi : 0 };
+  });
+  var tb = H('table', { class: 'wkt' }), hr = H('tr'); ['Wk', 'Dates', 'Phase', 'Plan mi', 'Done mi', 'Long plan', 'Long done', 'Quality session', 'Status'].forEach(function (h, i) { hr.appendChild(H('th', { class: i >= 3 && i <= 6 ? 'n' : '', text: h })); }); tb.appendChild(H('thead', null, [hr]));
+  var tbd = H('tbody'); rows.forEach(function (r) { var started = r.w.start <= td; tbd.appendChild(H('tr', null, [H('td', { text: String(r.w.n) }), H('td', { text: md(r.w.start) + ' to ' + md(r.w.start + 6) }), H('td', { text: r.w.phase }), H('td', { class: 'n', text: f0(r.w.total) }), H('td', { class: 'n', text: started ? f1(r.s.mi) : '–' }), H('td', { class: 'n', text: r.ls ? f0(r.ls) : r.w.n === 15 ? 'Race' : '–' }), H('td', { class: 'n', text: started && r.s.long ? f1(r.s.long) : '–' }), H('td', { class: 'wrap-ok', text: r.ql }), H('td', null, [H('span', { class: 'pill ' + r.st[0] }, [H('i'), r.st[1]])])])); });
+  tb.appendChild(tbd); wrap.appendChild(plainCard('Week by week', 'Every week of the block. Status compares miles run with the plan: under 75 percent is Under, over 120 percent is Over.', [H('div', { class: 'tbl-wrap' }, [tb])]));
+  app.appendChild(wrap);
+}
+
+/* ---------- training so far ---------- */
+function viewSoFar() {
+  var wrap = H('div', { class: 'stackv' }), td = todayNum(), lw = wkStart(td) - 7, W = [], k;
+  for (k = 15; k >= 0; k--) { var ws = lw - 7 * k, s = weekStat(ws); W.push({ s: ws, a: s, plan: null, parts: [['E', 'Easy'], ['M', 'Moderate'], ['H', 'Hard']].map(function (c) { return { label: c[1], color: 'var(--t-' + c[0].toLowerCase() + ')', v: s.eff[c[0]] }; }) }); }
+  var last8 = W.slice(8), tot = sum(last8.map(function (x) { return x.a.mi; })), E = sum(last8.map(function (x) { return x.a.eff.E; })), M = sum(last8.map(function (x) { return x.a.eff.M; })), Hh = sum(last8.map(function (x) { return x.a.eff.H; }));
+  var runs8 = []; for (var d = lw - 49; d < lw + 7; d++) (DAYACT[d] || []).forEach(function (a) { if (a.group === 'Run') runs8.push(a); });
+  var easyish = runs8.filter(function (a) { return mi(a.dist_km) < 9 && effort(a) !== 'H'; }), medHR = median(easyish.map(function (a) { return a.avg_hr; })), medPace = median(easyish.map(pacePerMi));
+  app.appendChild(H('p', { class: 'note', text: 'Everything here is computed from your Garmin data over the last eight completed weeks (' + md(lw - 49) + ' to ' + md(lw + 6) + '), with sixteen weeks in the chart. Effort is judged by average heart rate: easy is under ' + EASY_HR + ' bpm, moderate ' + EASY_HR + ' to ' + (HARD_HR - 1) + ', hard ' + HARD_HR + ' or more, or a quarter of the run above ' + Math.round(META.max_hr * .9) + ' bpm. Those cutoffs are 76 and 83 percent of your max heart rate of ' + META.max_hr + '.' }));
+  var tl = H('div', { class: 'tiles' });
+  var l4 = mean(W.slice(12).map(function (x) { return x.a.mi; })), p4 = mean(W.slice(8, 12).map(function (x) { return x.a.mi; }));
+  tl.appendChild(tile('Weekly miles, last 4 weeks', f1(l4), 'mi', 'prior 4 weeks: ' + f1(p4) + ' mi', ''));
+  tl.appendChild(tile('Runs per week', f1(mean(last8.map(function (x) { return x.a.runs; }))), '', 'plan asks for 5', ''));
+  tl.appendChild(tile('Longest run, 8 weeks', f1(Math.max.apply(null, last8.map(function (x) { return x.a.long; }))), 'mi', 'plan reaches 20', ''));
+  tl.appendChild(tile('Miles at easy effort', tot ? pct(E / tot) : '–', '', 'target is about 75 to 80 percent', E / tot >= 0.6 ? 'good' : 'bad'));
+  tl.appendChild(tile('Typical easy day avg HR', medHR ? f0(medHR) : '–', 'bpm', 'cap is ' + EASY_HR + ' bpm', medHR && medHR <= EASY_HR + 3 ? 'good' : 'bad'));
+  tl.appendChild(tile('Typical easy day pace', medPace ? ptime(medPace) : '–', '/mi', 'at that heart rate', ''));
+  wrap.appendChild(tl);
+  weekBars(wrap, { weeks: W, h: 260, aria: 'Weekly running miles by effort level', title: 'How hard your miles have been', sub: 'Weekly running miles split by effort. A marathon build normally keeps most miles green. Yellow and orange miles are not wasted, but they cost recovery.', legend: [['E', 'Easy'], ['M', 'Moderate'], ['H', 'Hard']].map(function (c) { return { name: c[1], color: 'var(--t-' + c[0].toLowerCase() + ')' }; }), cols: [{ h: 'Miles', f: function (r) { return f1(r.a.mi); } }, { h: 'Easy', f: function (r) { return f1(r.a.eff.E); } }, { h: 'Moderate', f: function (r) { return f1(r.a.eff.M); } }, { h: 'Hard', f: function (r) { return f1(r.a.eff.H); } }, { h: 'Runs', f: function (r) { return r.a.runs; } }] });
+  var recent = []; for (d = td; d > td - 56 && recent.length < 14; d--) (DAYACT[d] || []).slice().reverse().forEach(function (a) { if (a.group === 'Run' && recent.length < 14) recent.push(a); });
+  var cols = [{ h: 'Date', f: function (r) { return WD[(r.dn + 3) % 7] + ' ' + md(r.dn); } }, { h: 'Type', f: function (r) { return MT[atype(r)].n; } }, { h: 'Miles', n: 1, f: function (r) { return f1(mi(r.dist_km)); } }, { h: 'Pace /mi', n: 1, f: function (r) { var p = pacePerMi(r); return p ? ptime(p) : null; } }, { h: 'Avg HR', n: 1, f: function (r) { return r.avg_hr ? f0(r.avg_hr) : null; } }, { h: 'Time above ' + (HARD_HR - 1) + ' bpm', n: 1, f: function (r) { var z = r.zone_s; return z ? pct((z[4] + z[5]) / sum(z)) : null; } }, { h: 'Decoupling', n: 1, f: function (r) { return r.dec != null ? f1(r.dec) + '%' : null; } }, { h: 'Climb ft', n: 1, f: function (r) { return r.elev ? f0(ft(r.elev)) : null; } }];
+  wrap.appendChild(plainCard('Your last 14 runs', 'Time above ' + (HARD_HR - 1) + ' bpm is the share of the run in Garmin zones 4 and 5. Decoupling under 5 percent on steady runs means the aerobic base is holding up.', [table(cols, recent)]));
+  app.appendChild(wrap);
+}
+
+/* ---------- coach ---------- */
+function coachCards() {
+  var td = todayNum(), lw = wkStart(td) - 7, P = paces(), out = [], k, d;
+  var W8 = []; for (k = 7; k >= 0; k--) W8.push(weekStat(lw - 7 * k));
+  var m1 = mean(W8.slice(4).map(function (w) { return w.mi; })), m0 = mean(W8.slice(0, 4).map(function (w) { return w.mi; })), ratio = m0 > 0 ? m1 / m0 : null;
+  var all = fit('All'), ai = N - 1; while (ai > 0 && all.acwr[ai] == null) ai--; var ac = all.acwr[ai];
+  out.push({ t: 'Mileage ramp', k: ratio != null && ratio > 1.5 ? 'serious' : ratio != null && ratio > 1.25 ? 'warn' : 'good', s: ratio != null && ratio > 1.5 ? 'Fast ramp' : ratio != null && ratio > 1.25 ? 'Brisk' : 'Steady', e: 'The last four completed weeks averaged ' + f1(m1) + ' miles, up from ' + f1(m0) + ' in the four before' + (ratio ? ' (' + f1(ratio) + ' times)' : '') + '. Week by week: ' + W8.slice(4).map(function (w) { return f0(w.mi); }).join(', ') + '.' + (ac != null ? ' Your 7 day to 28 day load ratio is ' + f2(ac) + '; above 1.3 means a quick jump.' : ''), a: 'The plan starts at ' + f0(PLAN[0].total) + ' miles and builds to ' + f0(PLAN[11].total) + ' by week 12, with cutbacks in weeks 4 and 8 and a taper after. No week is more than about 12 percent above the last non-cutback week. Do not "make up" missed miles.' });
+  var tot = sum(W8.map(function (w) { return w.mi; })), E = sum(W8.map(function (w) { return w.eff.E; })), M = sum(W8.map(function (w) { return w.eff.M; })), H2 = sum(W8.map(function (w) { return w.eff.H; }));
+  var runs8 = []; for (d = lw - 49; d < lw + 7; d++) (DAYACT[d] || []).forEach(function (a) { if (a.group === 'Run') runs8.push(a); });
+  var easyish = runs8.filter(function (a) { return mi(a.dist_km) < 9 && effort(a) !== 'H'; }), mhr = median(easyish.map(function (a) { return a.avg_hr; }));
+  var es = tot ? E / tot : 0;
+  out.push({ t: 'Run your easy days easier', k: es < 0.35 ? 'serious' : es < 0.6 ? 'warn' : 'good', s: es < 0.35 ? 'Biggest lever' : es < 0.6 ? 'Room to improve' : 'Good', e: 'Of ' + f0(tot) + ' running miles in the last 8 weeks, ' + pct(es) + ' were at easy effort, ' + pct(tot ? M / tot : 0) + ' moderate and ' + pct(tot ? H2 / tot : 0) + ' hard. Your typical short, non-workout run averages ' + (mhr ? f0(mhr) : '–') + ' bpm, which is ' + (mhr ? f0(mhr / META.max_hr * 100) : '–') + ' percent of max. That is steady aerobic effort, not recovery.', a: 'Cap easy runs at ' + EASY_HR + ' bpm. For you that probably means ' + prange(P.e1, P.e2) + ', and some hills should become walking breaks. It will feel too slow for two weeks and then stop mattering. The payoff is that your Wednesday workouts and Saturday long runs get the energy they need instead of arriving on tired legs.' });
+  var longs = []; for (d = td - 1; d > td - 70; d--) (DAYACT[d] || []).forEach(function (a) { if (a.group === 'Run' && mi(a.dist_km) >= 9) longs.push(a); });
+  var lr = longs.slice(0, 4), lpace = mean(lr.map(pacePerMi)), lhr = mean(lr.map(function (a) { return a.avg_hr; })), dlt = lpace != null ? lpace - P.mp : null;
+  out.push({ t: 'Long runs', k: dlt != null && dlt < 30 ? 'serious' : dlt != null && dlt < 45 ? 'warn' : 'good', s: dlt != null && dlt < 30 ? 'Too fast' : dlt != null && dlt < 45 ? 'A bit fast' : 'Good', e: lr.length ? 'Your last ' + lr.length + ' runs of 9 or more miles averaged ' + pmi(lpace) + ' at ' + f0(lhr) + ' bpm. Against a goal pace of ' + pmi(P.mp) + ', that is ' + (dlt >= 0 ? f0(dlt) + ' seconds per mile slower' : f0(-dlt) + ' seconds per mile faster') + ' than race pace. The most recent was ' + f1(mi(lr[0].dist_km)) + ' miles at ' + pmi(pacePerMi(lr[0])) + '.' : 'No runs of 9 or more miles in the last ten weeks.', a: 'Run long runs at ' + prange(P.l1, P.l2) + ', 45 to 90 seconds per mile slower than goal pace. Marathon pace belongs only in the marked segments (weeks 6, 9, 11, 12 and 13). Your 11 miler showed good fitness, with decoupling under 5 percent, but doing it near race pace every week is how a build stalls in January.' });
+  var runsPerWk = mean(W8.map(function (w) { return w.runs; })), W26 = []; for (k = 25; k >= 0; k--) W26.push(weekStat(lw - 7 * k)); var zero = W26.filter(function (w) { return w.runs === 0; }).length, w3 = W26.filter(function (w) { return w.runs >= 3; }).length;
+  out.push({ t: 'Frequency and consistency', k: zero > 8 ? 'warn' : 'good', s: zero > 8 ? 'Patchy history' : 'Fine', e: 'You are running ' + f1(runsPerWk) + ' times a week lately. Over the last 26 weeks, ' + zero + ' had no runs at all and only ' + w3 + ' had three or more.', a: 'The plan uses five run days (Mon, Wed, Thu, Fri, Sat) and adds a short Sunday recovery run from week 5, with Tuesday kept for strength and rest. The short Thursday and Friday runs add volume cheaply. The single most valuable thing in the next 15 weeks is a week with no gaps, then repeating it fourteen times.' });
+  var rh = D.rhr7[N - 1], rb = D.rhr_base[N - 1], hv = D.hrv7[N - 1], lo = D.hrv_lo[N - 1], hi_ = D.hrv_hi[N - 1], sl = D.sleep7[N - 1], bad = 0, txt = [];
+  if (rh != null && rb != null) { txt.push('resting HR ' + f1(rh) + ' (baseline ' + f1(rb) + ')'); if (rh - rb >= 3) bad++; }
+  if (hv != null) { txt.push('HRV ' + f0(hv) + ' ms' + (lo != null ? ' (range ' + f0(lo) + ' to ' + f0(hi_) + ')' : '')); if (lo != null && hv < lo) bad++; }
+  if (sl != null) { txt.push('sleep ' + f1(sl) + ' h'); if (sl < 6.5) bad++; }
+  out.push({ t: 'Recovery signals', k: bad >= 2 ? 'serious' : bad === 1 ? 'warn' : 'good', s: bad >= 2 ? 'Back off' : bad === 1 ? 'Watch' : 'Green light', e: 'Right now: ' + txt.join(', ') + '.', a: 'Green light means take the plan as written. Two warning signs together (resting HR 3 or more above baseline, HRV below its range, under 6.5 hours of sleep) is the cue to swap a workout for an easy run. Sleep is the cheapest training aid you have. Aim for 7.5 hours through the peak weeks.' });
+  var cv = curVdot(), pr = cv ? predictMin(cv, MAR_M) * 60 : null, best = 0, bd = null; for (k = 0; k < N; k++) if (D.vdot90[k] != null && D.vdot90[k] > best) { best = D.vdot90[k]; bd = D.dates[k]; }
+  out.push({ t: 'Fitness against the goal', k: pr && P.gs < pr * 0.91 ? 'serious' : pr && P.gs < pr * 0.95 ? 'warn' : 'neutral', s: pr ? (P.gs < pr * 0.91 ? 'Very aggressive' : P.gs < pr * 0.95 ? 'Aggressive' : P.gs < pr - 60 ? 'Stretch' : 'Realistic') : 'n/a', e: pr ? 'Your best efforts of the last 90 days equal a VDOT of ' + f1(cv) + ', which predicts a ' + ptime(pr) + ' marathon today. Goal: ' + ptime(P.gs) + '.' + (best ? ' Your own history says the engine can be much bigger: VDOT ' + f1(best) + ' in ' + bd.slice(0, 4) + '.' : '') : 'No recent efforts to estimate from.', a: 'A structured 15 week block typically moves marathon fitness 3 to 6 percent for someone coming off a base of consistent running' + (pr && P.gs < pr * 0.91 ? ', and this goal needs about ' + f0((pr - P.gs) / pr * 100) + ' percent' : '') + '. Decide the real goal after the tune-up in weeks 9 to 11, not now. Keep ' + ptime(P.gs) + ' as the A goal, but pick a B goal near ' + ptime(P.gs + 600) + ' and a C goal near ' + ptime(P.gs + 1200) + ' now, so a bad day in February does not turn into a bad race. The Race plan tab lists the tune-up times that say which goal is live.' });
+  out.push({ t: 'Strength and durability', k: 'neutral', s: 'Keep it', e: 'Your calisthenics work is a real asset for core, hips and posture. Peak mileage weeks are when most overuse injuries show up.', a: 'Keep two short strength sessions on Tuesday and, if you want, Sunday. In weeks 9 to 12 drop anything that leaves your legs sore (deep squats, jumping, heavy lunges) and keep single leg balance, calf raises and hip work. Treat any pain that changes your stride as a reason to cut that day, not push through it.' });
+  out.push({ t: 'Fueling and gear', k: 'neutral', s: 'Practice', e: 'The marathon is run on fuel as much as fitness. Gut tolerance is trained like anything else.', a: 'On every long run from week 5, take 30 to 60 grams of carbohydrate per hour using exactly what you will carry in Kyoto, and drink to thirst. Wear the race shoes and kit for at least two long runs. February in Kyoto is typically cold (roughly 35 to 50°F), so plan a throwaway layer for the start corral.' });
+  out.push({ t: 'Taper', k: 'neutral', s: 'Weeks 13 to 15', e: 'Peak volume is week 12 (' + f0(PLAN[11].total) + ' miles). The taper cuts to ' + f0(PLAN[12].total) + ', ' + f0(PLAN[13].total) + ', then a light race week.', a: 'Taper volume, not intensity. Keep the marathon pace and strides work so your legs stay sharp. Feeling flat and restless in week 14 is normal. Do not add a bonus workout.' });
+  return out;
+}
+function viewCoach() {
+  var wrap = H('div', { class: 'stackv' }), c = planCall();
+  wrap.appendChild(H('div', { class: 'callout ' + c.k }, [H('span', { class: 'pill ' + (c.k === 'good' ? 'good' : c.k === 'warn' ? 'warn' : 'serious') }, [H('i'), c.t]), H('p', { text: c.d })]));
+  wrap.appendChild(H('p', { class: 'note', text: 'These notes are rules applied to your own data, not generic advice. They update every time you refresh. Where they disagree with how you feel, trust how you feel for a day and the data for a month.' }));
+  var g = H('div', { class: 'coach' });
+  coachCards().forEach(function (x) { g.appendChild(H('div', { class: 'card cc' }, [H('div', { class: 'cch' }, [H('h2', { text: x.t }), H('span', { class: 'pill ' + (x.k === 'good' ? 'good' : x.k === 'warn' ? 'warn' : x.k === 'serious' ? 'serious' : 'neutral') }, [H('i'), x.s])]), H('p', { class: 'ev', text: x.e }), H('p', { class: 'ac' }, [H('b', { text: 'What to do. ' }), x.a])])); });
+  wrap.appendChild(g); app.appendChild(wrap);
+}
+
+/* ---------- race plan ---------- */
+function viewRace() {
+  var wrap = H('div', { class: 'stackv' }), P = paces(), mx = META.max_hr;
+  var zrows = [['Easy and recovery', prange(P.e1, P.e2), 'under ' + EASY_HR, 'Most of your miles. Heart rate rules over pace.'], ['Long run', prange(P.l1, P.l2), Math.round(mx * .70) + ' to ' + Math.round(mx * .79), 'Steady and conversational. Finish feeling you could do more.'], ['Marathon pace', pmi(P.mp), Math.round(mx * .80) + ' to ' + Math.round(mx * .85), 'Race rhythm. Smooth, never a fight before mile 20.'], ['Threshold (tempo)', pmi(P.t), Math.round(mx * .86) + ' to ' + Math.round(mx * .90), 'Comfortably hard. About what you could hold for an hour.'], ['Intervals and fast minutes', pmi(P.i), Math.round(mx * .93) + ' and up', 'Hard but controlled. Short reps only.']];
+  wrap.appendChild(plainCard('Paces and heart rate by workout', 'Calculated from your goal (' + ptime(P.gs) + ', VDOT ' + f1(P.V) + ') and your max heart rate of ' + mx + '. Change the goal on the calendar tab and every pace updates.', [table([{ h: 'Workout', k: '0' }, { h: 'Pace', k: '1', n: 1 }, { h: 'Heart rate, bpm', k: '2', n: 1 }, { h: 'Notes', k: '3', wrap: 1 }], zrows.map(function (r) { return { 0: r[0], 1: r[1], 2: r[2], 3: r[3] }; }))]));
+  var cps = [[3, 'Mile 3'], [5, 'Mile 5'], [10, 'Mile 10'], [13.1, 'Half'], [15, 'Mile 15'], [20, 'Mile 20'], [23, 'Mile 23'], [26.2188, 'Finish']];
+  var rows = cps.map(function (c) { var e = c[0] <= 3 ? P.mp * c[0] + 5 * c[0] : P.mp * c[0] + 15; if (c[0] === 26.2188) e = P.gs; var cl = 9 * 3600 + e; var hh = Math.floor(cl / 3600), mm = Math.floor(cl % 3600 / 60); return { n: c[1], e: ptime(e), c: hh + ':' + String(mm).padStart(2, '0') }; });
+  wrap.appendChild(plainCard('Race day splits', 'An even-effort plan with the first 3 miles 5 seconds per mile slow to hold you back through the crowd. Clock time assumes you cross the start line at the 9:00 gun. The limit is 6 hours gun time.', [table([{ h: 'Checkpoint', k: 'n' }, { h: 'Elapsed', k: 'e', n: 1 }, { h: 'Clock time', k: 'c', n: 1 }], rows)]));
+  var tg = [['3.1 miles', 5000], ['6.2 miles', 10000], ['Half marathon, 13.1 miles', 21097.5]].map(function (x) { var t = predictMin(P.V, x[1]) * 60; return { d: x[0], t: ptime(t), p: ptime(t / (x[1] / 1609.344)) }; });
+  wrap.appendChild(plainCard('Tune-up benchmarks', 'If your goal is realistic, a race or hard time trial in weeks 9 to 11 (Jan 4 to Jan 24) should land near these times. Well off them means adjust the goal, not the training.', [table([{ h: 'Distance', k: 'd' }, { h: 'Equivalent time', k: 't', n: 1 }, { h: 'Pace /mi', k: 'p', n: 1 }], tg)]));
+  wrap.appendChild(plainCard('Race week checklist', null, [H('ul', { class: 'plain' }, ['Kyoto Marathon: Sunday, Feb 21, 2027. Marathon starts at 9:00 from Takebishi Stadium in Nishikyogoku Athletic Park and finishes at Heian Shrine. The time limit is 6 hours by gun time and checkpoints close on a schedule, so look up the cutoffs in the official guide.', 'Monday to Wednesday: normal easy running, plus the short marathon pace session on Wednesday.', 'Thursday and Friday: carbohydrate rich meals, steady water, early nights. Lay out everything for the morning.', 'Saturday: 2 mile shakeout with strides. Nothing new to eat.', 'Race morning: eat what you have practiced 2 to 3 hours before, add a throwaway layer, and start slow on purpose.', 'Miles 1 to 3 at ' + pmi(P.mp + 5) + ', then ' + pmi(P.mp) + ' until mile 20. The race starts at mile 20.'].map(function (t) { return H('li', { text: t }); }))]));
+  app.appendChild(wrap);
+}
+
+/* ---------- tab shell ---------- */
+function tabMarathon() {
+  buildDayAct();
+  var wrap = H('div', { class: 'stackv' });
+  wrap.appendChild(marHero()); wrap.appendChild(marTiles());
+  var views = [['cal', 'Calendar'], ['block', 'The block'], ['sofar', 'Training so far'], ['coach', 'Coach'], ['race', 'Race plan']];
+  var seg = H('div', { class: 'seg mviews', role: 'group', 'aria-label': 'Marathon section' });
+  views.forEach(function (v) { var b = H('button', { type: 'button', text: v[1], 'aria-pressed': String(MS.view === v[0]) }); b.addEventListener('click', function () { MS.view = v[0]; render(); }); seg.appendChild(b); });
+  wrap.appendChild(seg); app.appendChild(wrap);
+  ({ cal: viewCal, block: viewBlock, sofar: viewSoFar, coach: viewCoach, race: viewRace })[MS.view]();
+}
+
+/* ---------- shell ---------- */
+var RENDER = { overview: tabOverview, marathon: tabMarathon, fitness: tabFitness, performance: tabPerformance, recovery: tabRecovery, sports: tabSports, records: tabRecords, insights: tabInsights, method: tabMethod };
+var lastW = 0;
+function render() {
+  hideTip(); app.textContent = ''; document.body.classList.toggle('mar', st.tab === 'marathon');
+  try { RENDER[st.tab](); } catch (e) { app.appendChild(H('p', { class: 'note', text: 'Something went wrong drawing this tab: ' + e.message })); if (window.console) console.error(e); }
+  lastW = document.documentElement.clientWidth;
+  Array.prototype.forEach.call(document.querySelectorAll('#tabs a'), function (a) { if (a.dataset.tab === st.tab) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
+}
+function setHash() { try { if (location.hash !== '#' + st.tab) history.replaceState(null, '', '#' + st.tab); } catch (e) { } }
+function buildShell() {
+  document.getElementById('cov').textContent = dlabel(DAY0) + ' to ' + dlabel(DAYN) + ' · ' + META.n_activities + ' activities';
+  var pe = document.getElementById('presets'); PRESETS.forEach(function (p) { var b = H('button', { type: 'button', text: p[0], 'aria-pressed': String(st.preset === p[0]) }); b.addEventListener('click', function () { st.preset = p[0]; st.to = DAYN; st.from = p[1] ? Math.max(DAY0, DAYN - p[1] + 1) : DAY0; syncCtl(); render(); }); pe.appendChild(b); });
+  var sp = document.getElementById('sports'); ['All'].concat(SPORTS).forEach(function (s) { var b = H('button', { type: 'button', text: s, 'aria-pressed': String(st.sport === s) }); b.addEventListener('click', function () { st.sport = s; syncCtl(); render(); }); sp.appendChild(b); });
+  var tb = document.getElementById('tabs'); TABS.forEach(function (t) { var a = H('a', { href: '#' + t[0], text: t[1] }); a.dataset.tab = t[0]; a.addEventListener('click', function (ev) { ev.preventDefault(); st.tab = t[0]; setHash(); render(); window.scrollTo(0, 0); }); tb.appendChild(a); });
+  var fi = document.getElementById('from'), ti = document.getElementById('to'); fi.min = ti.min = D.dates[0]; fi.max = ti.max = D.dates[N - 1];
+  function custom() { if (!fi.value || !ti.value) return; var a = dn(fi.value), b = dn(ti.value); if (a > b) return; st.from = Math.max(DAY0, a); st.to = Math.min(DAYN, b); st.preset = ''; syncCtl(); render(); }
+  fi.addEventListener('change', custom); ti.addEventListener('change', custom);
+  document.getElementById('theme').addEventListener('click', function () { var order = ['system', 'light', 'dark']; st.theme = order[(order.indexOf(st.theme) + 1) % 3]; applyTheme(); try { localStorage.setItem('ti-theme', st.theme); } catch (e) { } });
+  syncCtl();
+}
+function syncCtl() {
+  Array.prototype.forEach.call(document.querySelectorAll('#presets button'), function (b) { b.setAttribute('aria-pressed', String(b.textContent === st.preset)); });
+  Array.prototype.forEach.call(document.querySelectorAll('#sports button'), function (b) { b.setAttribute('aria-pressed', String(b.textContent === st.sport)); });
+  document.getElementById('from').value = dstr(st.from); document.getElementById('to').value = dstr(st.to);
+}
+function applyTheme() { var r = document.documentElement; if (st.theme === 'system') r.removeAttribute('data-theme'); else r.setAttribute('data-theme', st.theme); document.getElementById('theme').textContent = 'Theme: ' + st.theme; }
+try { var t = localStorage.getItem('ti-theme'); if (t === 'light' || t === 'dark') st.theme = t; } catch (e) { }
+var h0 = (location.hash || '').slice(1); if (RENDER[h0]) st.tab = h0;
+buildShell(); applyTheme(); render();
+window.addEventListener('hashchange', function () { var h = location.hash.slice(1); if (RENDER[h] && h !== st.tab) { st.tab = h; render(); } });
+var rt; window.addEventListener('resize', function () { clearTimeout(rt); rt = setTimeout(function () { if (document.documentElement.clientWidth !== lastW) render(); }, 150); });
+window.__ti = { MS: MS, PLAN: PLAN, fit: fit, st: st, render: render, DATA: DATA };
+})();
+</script>

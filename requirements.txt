@@ -1,0 +1,3 @@
+fitparse
+numpy
+pandas

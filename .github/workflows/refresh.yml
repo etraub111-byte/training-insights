@@ -1,0 +1,91 @@
+name: Refresh dashboard
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"   # every 10 minutes (GitHub may delay a run by a few minutes)
+  workflow_dispatch:          # manual run from the GitHub app or website
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: refresh
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: pip install -r requirements.txt
+
+      - name: Cache key (one new snapshot per hour)
+        id: ck
+        run: echo "k=garmin-data-$(date -u +%Y%m%d%H)" >> "$GITHUB_OUTPUT"
+
+      - name: Restore Garmin data cache
+        uses: actions/cache/restore@v4
+        with:
+          path: data
+          key: ${{ steps.ck.outputs.k }}
+          restore-keys: garmin-data-
+
+      - name: Sync Garmin and build dashboard
+        env:
+          GARMIN_API_KEY: ${{ secrets.GARMIN_API_KEY }}
+        run: python scripts/refresh.py
+
+      - name: Save Garmin data cache
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: data
+          key: ${{ steps.ck.outputs.k }}
+
+      - name: Keep scheduled runs alive (GitHub pauses them after 60 quiet days)
+        if: github.event_name == 'schedule'
+        run: |
+          last=$(git log -1 --format=%ct)
+          if [ $(( $(date +%s) - last )) -gt $(( 20*86400 )) ]; then
+            git config user.name "github-actions"
+            git config user.email "github-actions@users.noreply.github.com"
+            git commit --allow-empty -m "keepalive" && git push
+          fi
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Encrypt and package as an installable app
+        env:
+          PAGE_PASSWORD: ${{ secrets.PAGE_PASSWORD }}
+        run: |
+          npx --yes staticrypt@3.5.4 dashboard.html -p "$PAGE_PASSWORD" --short \
+            -d site --template-title "Training Insights" \
+            --template-instructions "Enter your password." --remember 365
+          python scripts/pwa_wrap.py site/dashboard.html site
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
