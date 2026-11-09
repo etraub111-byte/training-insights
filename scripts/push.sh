@@ -5,9 +5,8 @@ cd "$(dirname "$0")/.."
 TOK=$(grep '^GITHUB_TOKEN=' .env | cut -d= -f2-)
 [ -n "$TOK" ] || { echo "No GITHUB_TOKEN in .env"; exit 1; }
 AUTH=$(printf 'x-access-token:%s' "$TOK" | base64 | tr -d '\n')
-G="git -c http.extraheader=Authorization:\ Basic\ $AUTH"
 git add -A
 git diff --cached --quiet || git commit -q -m "${1:-update dashboard}"
-$G pull -q --rebase origin main
-$G push -q origin main
+git -c "http.extraheader=Authorization: Basic $AUTH" pull -q --rebase origin main
+git -c "http.extraheader=Authorization: Basic $AUTH" push -q origin main
 echo "Pushed. Live site rebuilds in ~2 minutes."
